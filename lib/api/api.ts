@@ -11,9 +11,14 @@ export const apiInstance = axios.create({
 apiInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.data && error.response.data.message) {
-      return Promise.reject(error.response.data.message);
+    if (
+      error.response &&
+      error.response.data &&
+      error.response.data.data &&
+      error.response.data.data.message
+    ) {
+      return Promise.reject(error.response.data.data.message);
     }
     return Promise.reject(error);
-  }
+  },
 );
