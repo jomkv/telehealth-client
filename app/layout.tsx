@@ -4,6 +4,7 @@ import "./globals.css";
 import { QueryClientProvider } from "@/components/providers/query-client-provider";
 import { getMe } from "@/lib/helpers/get-me";
 import { UserProvider } from "@/components/providers/user-provider";
+import AppShell from "@/components/shells/app-shell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,10 +33,10 @@ export default async function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-screen flex flex-col">
         <QueryClientProvider>
           <UserProvider user={user} />
-          {children}
+          <AppShell>{children}</AppShell>
         </QueryClientProvider>
       </body>
     </html>
