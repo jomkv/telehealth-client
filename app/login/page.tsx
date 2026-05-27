@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthShell } from "@/components/shells/auth-shell";
 import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
 import { useMutation } from "@tanstack/react-query";
 import { userApi } from "@/lib/api/user.api";

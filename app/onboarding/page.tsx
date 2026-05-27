@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthShell } from "@/components/shells/auth-shell";
 import { DoctorForm } from "@/app/onboarding/components/doctor-form";
 import { PatientForm } from "@/app/onboarding/components/patient-form";
 import { useUserStore } from "../store";
