@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export interface Patient {
   id: string;
   userId: string;
@@ -7,4 +9,8 @@ export interface Patient {
   allergies: string[];
   medications: string[];
   notes?: string;
+}
+
+export interface PopulatedPatient extends Patient {
+  user: User;
 }

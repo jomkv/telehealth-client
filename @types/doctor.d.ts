@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export interface Specialization {
   id: string;
   label: string;
@@ -12,4 +14,8 @@ export interface Doctor {
   bio?: string;
   yearsOfPractice?: number;
   specialization: Specialization;
+}
+
+export interface PopulatedDoctor extends Doctor {
+  user: User;
 }
