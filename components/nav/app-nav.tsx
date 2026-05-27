@@ -2,11 +2,20 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationBell } from "./notification-bell";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { initials } from "@/lib/helpers/format";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { userApi } from "@/lib/api/user.api";
+import { toast } from "sonner";
 
 const patientLinks = [
   { to: "/patient" as const, label: "Home" },
@@ -23,8 +32,21 @@ const doctorLinks = [
 
 export function AppNav() {
   const user = useUserStore((s) => s.user);
+  const reset = useUserStore((s) => s.reset);
   const pathname = usePathname();
   const links = user?.role === "PATIENT" ? patientLinks : doctorLinks;
+
+  const router = useRouter();
+
+  const logout = useMutation({
+    mutationFn: userApi.logout,
+    onSuccess: () => {
+      reset();
+      router.replace("/login");
+      toast.success("Logged out.");
+    },
+    onError: () => toast.error("Something went wrong. Please try again later."),
+  });
 
   return (
     <div className="sticky top-6 z-40 mx-auto flex w-[min(1180px,calc(100%-2rem))] items-center gap-4 rounded-full bg-white px-5 py-3 shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
@@ -59,13 +81,28 @@ export function AppNav() {
       </nav>
       <div className="ml-auto flex items-center gap-3">
         <NotificationBell />
-        <Link href="/profile" className="flex items-center gap-2">
-          <Avatar className="h-9 w-9 ring-1 ring-border">
-            <AvatarFallback className="bg-muted text-xs">
-              {user ? initials(user.name) : "AB"}
-            </AvatarFallback>
-          </Avatar>
-        </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-2">
+              <Avatar className="h-9 w-9 ring-1 ring-border">
+                <AvatarFallback className="bg-muted text-xs">
+                  {user ? initials(user.name) : "AB"}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40 rounded-md">
+            <DropdownMenuItem asChild>
+              <Link href="/profile">Profile</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={logout.isPending}
+              onClick={() => logout.mutate()}
+            >
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

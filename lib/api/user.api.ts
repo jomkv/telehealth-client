@@ -11,6 +11,6 @@ export const userApi = {
   },
 
   async logout() {
-    // TODO
+    return await apiInstance.post("/auth/logout");
   },
 };
