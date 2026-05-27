@@ -39,9 +39,9 @@ export const consultationApi = {
     );
   },
 
-  async getDoctorConsultations(): Promise<ConsultationView[]> {
+  async getMyConsultations(): Promise<ConsultationView[]> {
     return (
-      await apiInstance<{ data: ConsultationView[] }>("/consultation/doctor")
+      await apiInstance.get<{ data: ConsultationView[] }>("/consultation")
     ).data.data;
   },
 };

@@ -15,7 +15,7 @@ export default function DoctorHomePage() {
   const user = useUserStore((s) => s.user);
   const { data: consults = [] } = useQuery({
     queryKey: ["consultations", "doctor", user?.doctor?.id],
-    queryFn: consultationApi.getDoctorConsultations,
+    queryFn: consultationApi.getMyConsultations,
     enabled: !!user?.doctor?.id,
   });
 

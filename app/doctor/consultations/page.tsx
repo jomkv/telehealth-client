@@ -20,7 +20,7 @@ export default function DoctorConsultationsPage() {
 
   const { data: all = [] } = useQuery({
     queryKey: ["consultations", "doctor", user?.doctor?.id],
-    queryFn: () => consultationApi.getDoctorConsultations(),
+    queryFn: consultationApi.getMyConsultations,
     enabled: !!user?.doctor?.id,
   });
 
