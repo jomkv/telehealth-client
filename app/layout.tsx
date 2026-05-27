@@ -5,6 +5,7 @@ import { QueryClientProvider } from "@/components/providers/query-client-provide
 import { getMe } from "@/lib/helpers/get-me";
 import { UserProvider } from "@/components/providers/user-provider";
 import AppShell from "@/components/shells/app-shell";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default async function RootLayout({
           <UserProvider user={user} />
           <AppShell>{children}</AppShell>
         </QueryClientProvider>
+        <Toaster />
       </body>
     </html>
   );

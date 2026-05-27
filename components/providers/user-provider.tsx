@@ -9,7 +9,7 @@ export function UserProvider({ user }: { user: MeUser | null }) {
 
   useEffect(() => {
     setUser(user);
-  }, [user]);
+  }, [setUser, user]);
 
   return null;
 }
