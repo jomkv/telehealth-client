@@ -23,6 +23,7 @@ import {
 import { useUserStore } from "@/app/store";
 import { availabilityApi } from "@/lib/api/availability.api";
 import { buildInitialState, slotCount } from "@/lib/helpers/availability-slots";
+import { PageHeader } from "@/components/nav/page-header";
 
 const DAYS: Day[] = [
   { key: "MON", label: "Monday" },
@@ -121,20 +122,12 @@ export default function AvailabilityPage() {
   const enabledCount = DAYS.filter(({ key }) => week[key].enabled).length;
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          • Your calendar
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          Weekly Schedule
-        </h1>
-        <p className="mt-1.5 text-muted-foreground">
-          Set your recurring availability. Changes apply immediately and
-          indefinitely until you update them again.
-        </p>
-      </div>
+    <div className="space-y-10">
+      <PageHeader
+        eyebrow="Your calendar"
+        title="Weekly Schedule"
+        description="Set your recurring availability. Changes apply immediately and indefinitely until you update them again."
+      />
 
       {/* Schedule grid */}
       <div className="rounded-[2rem] bg-card">
