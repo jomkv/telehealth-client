@@ -1,3 +1,6 @@
+import { Doctor } from "./doctor";
+import { Patient } from "./patient";
+
 export type Role = "PATIENT" | "DOCTOR";
 
 export interface FullUser {
@@ -14,6 +17,11 @@ export interface FullUser {
 }
 
 export type User = Omit<FullUser, "password">;
+
+export interface MeUser extends User {
+  patient?: Patient;
+  doctor?: Doctor;
+}
 
 export type CreateUserInput = Omit<
   FullUser,

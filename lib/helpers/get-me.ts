@@ -1,7 +1,7 @@
-import { User } from "@/@types/user";
+import { MeUser } from "@/@types/user";
 import { cookies } from "next/headers";
 
-export async function getMe(): Promise<User | null> {
+export async function getMe(): Promise<MeUser | null> {
   const cookieStore = await cookies();
   const allCookies = cookieStore.toString();
 
@@ -18,7 +18,7 @@ export async function getMe(): Promise<User | null> {
     });
 
     if (!res.ok) return null;
-    return (await res.json()).data as User;
+    return (await res.json()).data as MeUser;
   } catch (error) {
     return null;
   }

@@ -1,9 +1,9 @@
-import { User } from "@/@types/user";
+import { MeUser } from "@/@types/user";
 import { create } from "zustand";
 
 interface UserStore {
-  user: User | null;
-  setUser: (user: User | null) => void;
+  user: MeUser | null;
+  setUser: (user: MeUser | null) => void;
 }
 
 export const useUserStore = create<UserStore>((set) => ({
