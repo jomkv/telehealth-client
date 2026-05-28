@@ -1,4 +1,4 @@
-import { CreateUserInput, LoginInput } from "@/@types/user";
+import { CreateUserInput, LoginInput, MeUser } from "@/@types/user";
 import { apiInstance } from "./api";
 
 export const userApi = {
@@ -6,8 +6,9 @@ export const userApi = {
     return await apiInstance.post("/user", formData);
   },
 
-  async login(formData: LoginInput) {
-    return await apiInstance.post("/auth/login", formData);
+  async login(formData: LoginInput): Promise<MeUser> {
+    return (await apiInstance.post<{ data: MeUser }>("/auth/login", formData))
+      .data.data;
   },
 
   async logout() {

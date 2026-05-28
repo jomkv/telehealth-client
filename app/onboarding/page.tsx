@@ -4,9 +4,22 @@ import { AuthShell } from "@/components/shells/auth-shell";
 import { DoctorForm } from "@/app/onboarding/components/doctor-form";
 import { PatientForm } from "@/app/onboarding/components/patient-form";
 import { useUserStore } from "../store";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function OnboardingPage() {
   const user = useUserStore((s) => s.user);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.replace("/login");
+    }
+
+    if (user?.isOnboarded) {
+      router.replace("/");
+    }
+  }, [user, router]);
 
   const title =
     user?.role === "DOCTOR" ? "Doctor onboarding" : "Patient onboarding";

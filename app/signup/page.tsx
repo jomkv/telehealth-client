@@ -11,6 +11,8 @@ import { AuthShell } from "@/components/shells/auth-shell";
 import { useMutation } from "@tanstack/react-query";
 import { userApi } from "@/lib/api/user.api";
 import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
+import { useEffect } from "react";
+import { useUserStore } from "../store";
 
 const roleOptions = ["PATIENT", "DOCTOR"] as const;
 
@@ -53,11 +55,12 @@ export default function SignupPage() {
     },
   });
 
+  const user = useUserStore((s) => s.user);
   const signup = useMutation({
     mutationFn: userApi.signup,
   });
-
   const router = useRouter();
+
   const onSubmit = async (values: SignupFormValues) => {
     clearErrors("root");
     try {
@@ -72,6 +75,12 @@ export default function SignupPage() {
       setError("root", { message });
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/");
+    }
+  }, [user, router]);
 
   return (
     <AuthShell

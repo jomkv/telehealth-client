@@ -11,6 +11,9 @@ import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
 import { useMutation } from "@tanstack/react-query";
 import { userApi } from "@/lib/api/user.api";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "../store";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 const loginSchema = z.object({
   email: z.string().email("Enter valid email."),
@@ -34,25 +37,35 @@ export default function LoginPage() {
     },
   });
 
+  const user = useUserStore((s) => s.user);
+  const setUser = useUserStore((s) => s.setUser);
+  const reset = useUserStore((s) => s.reset);
   const login = useMutation({
     mutationFn: userApi.login,
   });
-
   const router = useRouter();
+
   const onSubmit = async (values: LoginFormValues) => {
     clearErrors("root");
     try {
-      await login.mutateAsync(values);
+      const user = await login.mutateAsync(values);
 
-      // toast successful login
-
+      reset();
+      setUser(user);
       router.push("/");
+      toast.success("Logged in");
     } catch (error) {
       const message = extractErrorMessage(error);
 
       setError("root", { message });
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      router.replace("/");
+    }
+  }, [user, router]);
 
   return (
     <AuthShell
