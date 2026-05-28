@@ -14,32 +14,12 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import {
-  AvailabilityRow,
-  Day,
-  DayOfWeek,
-  WeekState,
-} from "@/@types/availability";
+import { AvailabilityRow, DayOfWeek, WeekState } from "@/@types/availability";
 import { useUserStore } from "@/app/store";
 import { availabilityApi } from "@/lib/api/availability.api";
 import { buildInitialState, slotCount } from "@/lib/helpers/availability-slots";
 import { PageHeader } from "@/components/nav/page-header";
-
-const DAYS: Day[] = [
-  { key: "MON", label: "Monday" },
-  { key: "TUE", label: "Tuesday" },
-  { key: "WED", label: "Wednesday" },
-  { key: "THU", label: "Thursday" },
-  { key: "FRI", label: "Friday" },
-  { key: "SAT", label: "Saturday" },
-  { key: "SUN", label: "Sunday" },
-];
-
-// Hourly options 00:00 – 23:00
-const HOURS: string[] = Array.from(
-  { length: 24 },
-  (_, i) => `${String(i).padStart(2, "0")}:00`, // Format to "HH:00", fixed 00 minutes
-);
+import { DAYS, HOURS } from "@/lib/constants";
 
 export default function AvailabilityPage() {
   const user = useUserStore((s) => s.user);
@@ -56,7 +36,7 @@ export default function AvailabilityPage() {
 
   // Once data loads, seed local state (only on first load)
   if (data && !week) {
-    setWeek(buildInitialState(DAYS, data));
+    setWeek(buildInitialState(data));
   }
 
   const { mutate: save, isPending } = useMutation({
