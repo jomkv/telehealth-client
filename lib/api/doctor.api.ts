@@ -2,6 +2,7 @@ import {
   PopulatedDoctor,
   PopulatedDoctorWithAvailability,
   Specialization,
+  SymptomSearchResult,
 } from "@/@types/doctor";
 import { apiInstance } from "./api";
 
@@ -25,6 +26,14 @@ export const doctorApi = {
     return (
       await apiInstance.get<{ data: PopulatedDoctor[] }>("/doctor", {
         params: { q: trimmed.length > 0 ? trimmed : undefined },
+      })
+    ).data.data;
+  },
+
+  async searchSymptom(symptoms: string): Promise<SymptomSearchResult> {
+    return (
+      await apiInstance.get<{ data: SymptomSearchResult }>("/doctor/symptoms", {
+        params: { symptoms },
       })
     ).data.data;
   },

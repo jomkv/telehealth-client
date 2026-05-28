@@ -21,6 +21,11 @@ export interface PopulatedDoctor extends Doctor {
   user: User;
 }
 
+export interface SymptomSearchResult {
+  doctors: PopulatedDoctor & { relevanceScore: number };
+  specializations: string[];
+}
+
 export interface PopulatedDoctorWithAvailability extends PopulatedDoctor {
   availability: AvailabilityRow[];
   bookedSlots: string[];
