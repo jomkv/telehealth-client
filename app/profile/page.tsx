@@ -4,9 +4,18 @@ import { PageHeader } from "@/components/nav/page-header";
 import { useUserStore } from "../store";
 import PatientProfile from "./components/profiles/patient-profile";
 import DoctorProfile from "./components/profiles/doctor-profile";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function ProfilePage() {
   const user = useUserStore((s) => s.user);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!user) {
+      router.replace("/login");
+    }
+  }, [user, router]);
 
   return (
     <div className="space-y-10">
