@@ -10,6 +10,10 @@ import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useUserStore } from "../store";
 import { consultationApi } from "@/lib/api/consultation.api";
+import {
+  getConsultationCounts,
+  sortConsultations,
+} from "@/lib/helpers/consultation-counts";
 
 function ActionCard({
   href,
@@ -46,12 +50,10 @@ export default function PatientHome() {
     queryFn: consultationApi.getMyConsultations,
   });
 
-  const upcoming = consults
-    .filter((c) => c.status === "PENDING" || c.status === "ONGOING")
-    .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt));
-
+  const upcoming = sortConsultations(consults);
   const next = upcoming[0];
-  const completed = consults.filter((c) => c.status === "DONE").length;
+
+  const { completedCount } = getConsultationCounts(consults);
 
   return (
     <div className="space-y-12">
@@ -70,7 +72,7 @@ export default function PatientHome() {
         />
         <StatCard
           label="Completed"
-          value={isLoading ? "—" : completed || "—"}
+          value={isLoading ? "—" : completedCount || "—"}
           hint="lifetime visits"
         />
         <StatCard

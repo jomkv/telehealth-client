@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { isToday } from "date-fns";
 import { PageHeader } from "@/components/nav/page-header";
 import { StatCard } from "@/components/cards/stat-card";
 import { ConsultationCard } from "@/components/cards/consultation-card";
@@ -10,6 +9,10 @@ import { Button } from "@/components/ui/button";
 import { useUserStore } from "../store";
 import { consultationApi } from "@/lib/api/consultation.api";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
+import {
+  getConsultationCounts,
+  sortConsultations,
+} from "@/lib/helpers/consultation-counts";
 
 export default function DoctorHomePage() {
   const user = useUserStore((s) => s.user);
@@ -19,15 +22,11 @@ export default function DoctorHomePage() {
     enabled: !!user?.doctor?.id,
   });
 
-  // Derived counts
-  const today = consults.filter((c) => isToday(new Date(c.scheduledAt)));
-  const upcoming = consults.filter(
-    (c) => c.status === "PENDING" || c.status === "ONGOING",
-  );
-  const completedCount = consults.filter((c) => c.status === "DONE").length;
-  const next = [...upcoming].sort((a, b) =>
-    a.scheduledAt.localeCompare(b.scheduledAt),
-  )[0];
+  const { todayCount, upcomingCount, completedCount } =
+    getConsultationCounts(consults);
+  const upcoming = sortConsultations(consults);
+
+  const next = upcoming[0];
 
   const firstName = user?.name.split(" ")[0] || "Doctor";
 
@@ -37,7 +36,7 @@ export default function DoctorHomePage() {
       <PageHeader
         eyebrow={`Good day, ${firstName}`}
         title="Your schedule today."
-        description={`${today.length} consultation${today.length === 1 ? "" : "s"} on the books for today.`}
+        description={`${todayCount.length} consultation${todayCount.length === 1 ? "" : "s"} on the books for today.`}
         actions={
           <Button asChild className="rounded-full">
             <Link href="/doctor/availability">Manage availability</Link>
@@ -47,8 +46,16 @@ export default function DoctorHomePage() {
 
       {/* Stats */}
       <section className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Today" value={today.length} hint="consultations" />
-        <StatCard label="Upcoming" value={upcoming.length} hint="this period" />
+        <StatCard
+          label="Today"
+          value={todayCount.length}
+          hint="consultations"
+        />
+        <StatCard
+          label="Upcoming"
+          value={upcomingCount.length}
+          hint="this period"
+        />
         <StatCard label="Completed" value={completedCount} hint="lifetime" />
       </section>
 
@@ -63,13 +70,13 @@ export default function DoctorHomePage() {
       {/* Today's timeline */}
       <section className="space-y-4">
         <Eyebrow>Today&rsquo;s timeline</Eyebrow>
-        {today.length === 0 ? (
+        {todayCount.length === 0 ? (
           <div className="rounded-[2rem] bg-card p-12 text-center text-muted-foreground">
             Nothing scheduled for today. Enjoy the breathing room.
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            {today.map((c) => (
+            {todayCount.map((c) => (
               <ConsultationCard
                 key={c.id}
                 consultation={c}
