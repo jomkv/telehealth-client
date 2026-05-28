@@ -13,6 +13,7 @@ export interface Consultation {
   patientNotes: string;
   doctorNotes?: string;
   meetingLink: string;
+  rescheduledFrom?: string | null;
 }
 
 export interface ConsultationView extends Consultation {
