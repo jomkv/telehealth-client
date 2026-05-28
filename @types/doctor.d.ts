@@ -1,3 +1,4 @@
+import { AvailabilityRow } from "./availability";
 import { User } from "./user";
 
 export interface Specialization {
@@ -18,6 +19,10 @@ export interface Doctor {
 
 export interface PopulatedDoctor extends Doctor {
   user: User;
+}
+
+export interface PopulatedDoctorWithAvailability extends PopulatedDoctor {
+  availability: AvailabilityRow[];
 }
 
 export interface OnboardDoctorInput {

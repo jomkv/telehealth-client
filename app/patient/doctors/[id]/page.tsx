@@ -1,7 +1,8 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { PageHeader } from "@/components/nav/page-header";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,49 +18,24 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { formatHour, initials } from "@/lib/helpers/format";
-import { AvailabilityRow } from "@/@types/availability";
 import { buildSchedule } from "@/lib/helpers/availability-slots";
+import { useQuery } from "@tanstack/react-query";
+import { doctorApi } from "@/lib/api/doctor.api";
 
-// draft
-interface DoctorDetail {
-  id: string;
-  specializationId: string;
-  bio?: string | null;
-  yearsOfPractice?: number | null;
-  user: { name: string; email: string; mobileNumber: string };
-  specialization: { label: string; description: string };
-  availability: AvailabilityRow[];
-}
+export default function DoctorDetailPage() {
+  const { id } = useParams<{ id: string }>();
 
-const DOCTOR: DoctorDetail = {
-  id: "doc-1",
-  specializationId: "spec-1",
-  yearsOfPractice: 14,
-  bio: "Specializing in interventional cardiology and preventive heart care. Board-certified with extensive clinical trial experience across major medical centers in the Philippines.",
-  user: {
-    name: "Dr. Maria Santos",
-    email: "maria.santos@telecare.ph",
-    mobileNumber: "+63 917 555 0101",
-  },
-  specialization: {
-    label: "Cardiology",
-    description: "Heart and cardiovascular system",
-  },
-  // AvailabilityTemplate: dayOfWeek + startTime + endTime, hourly intervals
-  availability: [
-    { dayOfWeek: "MON", startTime: "09:00", endTime: "12:00" },
-    { dayOfWeek: "WED", startTime: "13:00", endTime: "17:00" },
-    { dayOfWeek: "SAT", startTime: "08:00", endTime: "10:00" },
-  ],
-};
+  const {
+    data: doctor,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["doctor", id],
+    queryFn: () => doctorApi.getDoctor(id),
+    enabled: !!id,
+  });
 
-export default function DoctorDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const doctor = DOCTOR;
-  const schedule = buildSchedule(doctor.availability);
+  const schedule = doctor ? buildSchedule(doctor.availability) : [];
 
   const [selectedSlot, setSelectedSlot] = useState<{
     day: string;
@@ -77,6 +53,42 @@ export default function DoctorDetailPage({
   function handleBook() {
     toast.success("Consultation booked");
     setOpen(false);
+  }
+
+  if (isLoading) {
+    return (
+      <div className="space-y-10">
+        <div className="h-5 w-36 rounded-full bg-card animate-pulse" />
+        <section className="flex flex-wrap items-start gap-8 rounded-[2.5rem] bg-card p-8">
+          <div className="h-32 w-32 rounded-full bg-muted animate-pulse" />
+          <div className="flex-1 min-w-[260px] space-y-3">
+            <div className="h-4 w-28 rounded-full bg-muted animate-pulse" />
+            <div className="h-10 w-64 rounded-full bg-muted animate-pulse" />
+            <div className="h-4 w-40 rounded-full bg-muted animate-pulse" />
+            <div className="h-4 w-72 rounded-full bg-muted animate-pulse" />
+          </div>
+        </section>
+        <section className="space-y-6">
+          <div className="h-12 w-72 rounded-full bg-card animate-pulse" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={`slot-skeleton-${index}`}
+                className="h-12 rounded-full bg-card animate-pulse"
+              />
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (isError || !doctor) {
+    return (
+      <div className="py-24 text-center text-muted-foreground">
+        Doctor not found.
+      </div>
+    );
   }
 
   return (
@@ -130,7 +142,7 @@ export default function DoctorDetailPage({
                   {label}
                 </p>
 
-                {/* Timeslot pills — only available slots rendered, no disabled placeholders */}
+                {/* Timeslot pills */}
                 <div className="flex flex-wrap gap-2">
                   {slots.map((time) => (
                     <button
