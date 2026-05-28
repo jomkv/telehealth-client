@@ -6,6 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConsultationCard } from "@/components/cards/consultation-card";
 import { consultationApi } from "@/lib/api/consultation.api";
 import { useUserStore } from "@/app/store";
+import {
+  filterCancelledConsultations,
+  filterPastConsultations,
+  filterUpcomingConsultations,
+} from "@/lib/helpers/consultation-counts";
 
 function Empty({ label }: { label: string }) {
   return (
@@ -24,15 +29,9 @@ export default function DoctorConsultationsPage() {
     enabled: !!user?.doctor?.id,
   });
 
-  const upcoming = all
-    .filter((c) => c.status === "PENDING" || c.status === "ONGOING")
-    .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt));
-
-  const past = all
-    .filter((c) => c.status === "DONE")
-    .sort((a, b) => b.scheduledAt.localeCompare(a.scheduledAt));
-
-  const cancelled = all.filter((c) => c.status === "CANCELLED");
+  const upcoming = filterUpcomingConsultations(all);
+  const past = filterPastConsultations(all);
+  const cancelled = filterCancelledConsultations(all);
 
   return (
     <div className="space-y-10">

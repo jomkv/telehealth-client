@@ -1,7 +1,7 @@
 import { ConsultationView } from "@/@types/consultation";
 import { isToday } from "date-fns";
 
-export const sortConsultations = (
+export const filterUpcomingConsultations = (
   consults: ConsultationView[],
 ): ConsultationView[] => {
   const sorted = consults
@@ -9,6 +9,22 @@ export const sortConsultations = (
     .sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt));
 
   return sorted;
+};
+
+export const filterPastConsultations = (
+  consults: ConsultationView[],
+): ConsultationView[] => {
+  const sorted = consults
+    .filter((c) => c.status === "DONE")
+    .sort((a, b) => b.scheduledAt.localeCompare(a.scheduledAt));
+
+  return sorted;
+};
+
+export const filterCancelledConsultations = (
+  consults: ConsultationView[],
+): ConsultationView[] => {
+  return consults.filter((c) => c.status === "CANCELLED");
 };
 
 export const getConsultationCounts = (consults: ConsultationView[]) => {

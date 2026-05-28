@@ -11,8 +11,8 @@ import type { ReactNode } from "react";
 import { useUserStore } from "../store";
 import { consultationApi } from "@/lib/api/consultation.api";
 import {
+  filterUpcomingConsultations,
   getConsultationCounts,
-  sortConsultations,
 } from "@/lib/helpers/consultation-counts";
 
 function ActionCard({
@@ -50,7 +50,7 @@ export default function PatientHome() {
     queryFn: consultationApi.getMyConsultations,
   });
 
-  const upcoming = sortConsultations(consults);
+  const upcoming = filterUpcomingConsultations(consults);
   const next = upcoming[0];
 
   const { completedCount } = getConsultationCounts(consults);

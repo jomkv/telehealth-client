@@ -10,8 +10,8 @@ import { useUserStore } from "../store";
 import { consultationApi } from "@/lib/api/consultation.api";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
 import {
+  filterPastConsultations,
   getConsultationCounts,
-  sortConsultations,
 } from "@/lib/helpers/consultation-counts";
 
 export default function DoctorHomePage() {
@@ -24,7 +24,7 @@ export default function DoctorHomePage() {
 
   const { todayCount, upcomingCount, completedCount } =
     getConsultationCounts(consults);
-  const upcoming = sortConsultations(consults);
+  const upcoming = filterPastConsultations(consults);
 
   const next = upcoming[0];
 
