@@ -19,3 +19,9 @@ export interface Doctor {
 export interface PopulatedDoctor extends Doctor {
   user: User;
 }
+
+export interface OnboardDoctorInput {
+  specializationId: string;
+  bio?: string;
+  yearsOfPractice?: number;
+}

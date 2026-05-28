@@ -1,3 +1,5 @@
+import { OnboardDoctorInput } from "@/@types/doctor";
+import { OnboardPatientInput } from "@/@types/patient";
 import { CreateUserInput, LoginInput, MeUser } from "@/@types/user";
 import { apiInstance } from "./api";
 
@@ -13,5 +15,21 @@ export const userApi = {
 
   async logout() {
     return await apiInstance.post("/auth/logout");
+  },
+
+  async onboardPatient(formData: OnboardPatientInput): Promise<MeUser> {
+    return (
+      await apiInstance.post<{ data: MeUser }>("/user/onboard", {
+        patient: formData,
+      })
+    ).data.data;
+  },
+
+  async onboardDoctor(formData: OnboardDoctorInput): Promise<MeUser> {
+    return (
+      await apiInstance.post<{ data: MeUser }>("/user/onboard", {
+        doctor: formData,
+      })
+    ).data.data;
   },
 };

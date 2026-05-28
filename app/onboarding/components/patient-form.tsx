@@ -4,8 +4,14 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
+import { userApi } from "@/lib/api/user.api";
+import { useUserStore } from "@/app/store";
 
 const toNumber = (value: unknown) => {
   if (value === "" || value === null || value === undefined) {
@@ -56,13 +62,20 @@ type PatientFormInput = z.input<typeof patientSchema>;
 type PatientFormValues = z.output<typeof patientSchema>;
 
 export function PatientForm() {
-  const onSubmit = () => {};
+  const setUser = useUserStore((s) => s.setUser);
+  const reset = useUserStore((s) => s.reset);
+  const router = useRouter();
+  const onboard = useMutation({
+    mutationFn: userApi.onboardPatient,
+  });
 
   const {
     register,
     handleSubmit,
     setValue,
     control,
+    clearErrors,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<PatientFormInput, unknown, PatientFormValues>({
     resolver: zodResolver(patientSchema),
@@ -121,6 +134,21 @@ export function PatientForm() {
   ) => {
     const next = current.filter((item) => item !== value);
     setValue(field, next, { shouldValidate: true });
+  };
+
+  const onSubmit = async (values: PatientFormValues) => {
+    clearErrors("root");
+    try {
+      const user = await onboard.mutateAsync(values);
+
+      reset();
+      setUser(user);
+      router.push("/");
+      toast.success("Onboarding done");
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      setError("root", { message });
+    }
   };
 
   return (
@@ -341,10 +369,15 @@ export function PatientForm() {
       <Button
         type="submit"
         className="h-12 w-full rounded-full bg-[#141413] text-[#F3F0EE] hover:bg-[#141413]/90"
-        disabled={isSubmitting}
+        disabled={isSubmitting || onboard.isPending}
       >
         Complete onboarding
       </Button>
+      {errors.root?.message ? (
+        <p className="text-center text-sm text-[#CF4500]">
+          {errors.root.message}
+        </p>
+      ) : null}
     </form>
   );
 }

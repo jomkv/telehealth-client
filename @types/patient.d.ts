@@ -11,6 +11,15 @@ export interface Patient {
   notes?: string;
 }
 
+export interface OnboardPatientInput {
+  weight: number;
+  height: number;
+  conditions?: string[];
+  allergies?: string[];
+  medications?: string[];
+  notes?: string;
+}
+
 export interface PopulatedPatient extends Patient {
   user: User;
 }

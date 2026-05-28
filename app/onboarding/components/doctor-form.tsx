@@ -4,8 +4,15 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { doctorApi } from "@/lib/api/doctor.api";
+import { userApi } from "@/lib/api/user.api";
+import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
+import { useUserStore } from "@/app/store";
 import { Specialization } from "@/@types/doctor";
 
 const toOptionalNumber = (value: unknown) => {
@@ -37,15 +44,42 @@ type DoctorFormInput = z.input<typeof doctorSchema>;
 type DoctorFormValues = z.output<typeof doctorSchema>;
 
 export function DoctorForm() {
+  const setUser = useUserStore((s) => s.setUser);
+  const resetUser = useUserStore((s) => s.reset);
+  const router = useRouter();
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [specializations, setSpecializations] = useState<Specialization[]>([]);
 
-  const onSubmit = () => {};
+  const onboard = useMutation({
+    mutationFn: userApi.onboardDoctor,
+  });
+
+  const { data: specializationOptions, isPending } = useQuery({
+    queryKey: ["specializations"],
+    queryFn: doctorApi.getSpecializations,
+  });
+
+  const onSubmit = async (values: DoctorFormValues) => {
+    clearErrors("root");
+    try {
+      const user = await onboard.mutateAsync(values);
+
+      resetUser();
+      setUser(user);
+      router.push("/");
+      toast.success("Onboarding done");
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      setError("root", { message });
+    }
+  };
 
   const {
     register,
     handleSubmit,
     control,
+    clearErrors,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<DoctorFormInput, unknown, DoctorFormValues>({
     resolver: zodResolver(doctorSchema),
@@ -57,6 +91,13 @@ export function DoctorForm() {
   });
 
   const selectedId = useWatch({ control, name: "specializationId" });
+
+  useEffect(() => {
+    if (specializationOptions) {
+      setSpecializations(specializationOptions);
+    }
+  }, [specializationOptions]);
+
   const selectedSpecialization = specializations.find(
     (item) => item.id === selectedId,
   );
@@ -73,6 +114,7 @@ export function DoctorForm() {
         <select
           className="h-12 w-full appearance-none rounded-full border border-[#141413]/15 bg-white px-5 text-base text-[#141413] shadow-[inset_0_0_0_1px_rgba(20,20,19,0.04)] outline-none focus-visible:ring-2 focus-visible:ring-[#141413]/20"
           {...register("specializationId")}
+          disabled={isPending}
         >
           <option value="">Select specialization</option>
           {specializations.map((specialization) => (
@@ -145,10 +187,15 @@ export function DoctorForm() {
       <Button
         type="submit"
         className="h-12 w-full rounded-full bg-[#141413] text-[#F3F0EE] hover:bg-[#141413]/90"
-        disabled={isSubmitting}
+        disabled={isSubmitting || onboard.isPending}
       >
         Complete onboarding
       </Button>
+      {errors.root?.message ? (
+        <p className="text-center text-sm text-[#CF4500]">
+          {errors.root.message}
+        </p>
+      ) : null}
     </form>
   );
 }
