@@ -6,10 +6,16 @@ import {
 import { apiInstance } from "./api";
 
 export const doctorApi = {
-  async getDoctor(doctorId: string): Promise<PopulatedDoctorWithAvailability> {
+  async getDoctor(
+    doctorId: string,
+    fromIso?: string,
+    toIso?: string,
+  ): Promise<PopulatedDoctorWithAvailability> {
+    const params = fromIso && toIso ? { from: fromIso, to: toIso } : undefined;
     return (
       await apiInstance.get<{ data: PopulatedDoctorWithAvailability }>(
         `/doctor/${doctorId}`,
+        { params },
       )
     ).data.data;
   },

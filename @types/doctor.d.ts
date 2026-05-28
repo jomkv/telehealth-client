@@ -23,6 +23,7 @@ export interface PopulatedDoctor extends Doctor {
 
 export interface PopulatedDoctorWithAvailability extends PopulatedDoctor {
   availability: AvailabilityRow[];
+  bookedSlots: string[];
 }
 
 export interface OnboardDoctorInput {

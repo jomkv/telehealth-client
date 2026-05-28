@@ -11,6 +11,8 @@ export const formatDate = (d: string | Date) =>
 export const formatTime = (d: string | Date) => format(new Date(d), "h:mm a");
 export const formatDateTime = (d: string | Date) =>
   format(new Date(d), "MMM d, yyyy · h:mm a");
+export const formatShortDate = (d: string | Date) =>
+  format(new Date(d), "EEE, MMM d");
 export const formatHour = (time: string): string => {
   const [h] = time.split(":").map(Number);
   const period = h < 12 ? "AM" : "PM";
