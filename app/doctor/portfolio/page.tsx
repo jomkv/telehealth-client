@@ -50,31 +50,32 @@ export default function PortfolioPage() {
       <section className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-[2rem] bg-card p-6">
           <Eyebrow>Specialty</Eyebrow>
-          <Select value={specId} disabled={isPending}>
+          <Select value={specId} onValueChange={setSpecId} disabled={isPending}>
             <SelectTrigger className="w-full mt-3">
               <SelectValue placeholder="Select a specialization" />
             </SelectTrigger>
             <SelectContent>
-              {specializations &&
-                specializations.map((specialization) => (
-                  <SelectItem key={specialization.id} value={specialization.id}>
-                    {specialization.label}
-                  </SelectItem>
-                ))}
+              {specializations?.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="rounded-[2rem] bg-card p-6">
-          <Eyebrow>Years of Practice</Eyebrow>
-          <Input className="mt-3" />
-        </div>
 
         <div className="rounded-[2rem] bg-card p-6">
+          <Eyebrow>Years of Practice</Eyebrow>
+          <Input className="mt-3" type="number" min={0} />
+        </div>
+
+        <div className="rounded-[2rem] bg-card p-6 sm:col-span-2">
           <Eyebrow>Bio</Eyebrow>
           <Textarea rows={5} className="mt-3" />
-          <Button className="mt-4 rounded-full" disabled={false}>
-            Save
-          </Button>
+        </div>
+
+        <div className="sm:col-span-2 flex justify-end">
+          <Button className="rounded-full px-8">Apply Changes</Button>
         </div>
       </section>
 

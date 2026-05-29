@@ -28,6 +28,7 @@ const doctorLinks = [
   { to: "/doctor" as const, label: "Home" },
   { to: "/doctor/availability" as const, label: "Availability" },
   { to: "/doctor/consultations" as const, label: "Consultations" },
+  { to: "/doctor/portfolio" as const, label: "Portfolio" },
 ];
 
 export function AppNav() {

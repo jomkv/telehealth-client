@@ -13,7 +13,7 @@ export default function RecordsPage() {
   const user = useUserStore((s) => s.user);
 
   const { data: all = [] } = useQuery({
-    queryKey: ["consultations", "doctor", user?.doctor?.id],
+    queryKey: ["consultations", "patient", user?.patient?.id],
     queryFn: consultationApi.getMyConsultations,
     enabled: !!user?.patient?.id,
   });

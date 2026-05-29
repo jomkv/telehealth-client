@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import Field from "../field";
+import { SPECIALIZATIONS } from "@/lib/mock-data/specialization";
 
 const doctorSchema = z.object({
   name: z.string().min(1, "Required").max(100),
@@ -29,12 +30,6 @@ type DoctorFormValues = z.infer<typeof doctorSchema>;
 export default function DoctorProfile() {
   const user = useUserStore((s) => s.user);
 
-  const specializations = [
-    { id: "cardiology", label: "Cardiology" },
-    { id: "dermatology", label: "Dermatology" },
-    { id: "family-medicine", label: "Family Medicine" },
-    { id: "pediatrics", label: "Pediatrics" },
-  ];
   const isPending = false;
 
   const form = useForm<DoctorFormValues>({
@@ -89,7 +84,7 @@ export default function DoctorProfile() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {specializations.map((s: { id: string; label: string }) => (
+            {SPECIALIZATIONS.map((s: { id: string; label: string }) => (
               <SelectItem key={s.id} value={s.id}>
                 {s.label}
               </SelectItem>

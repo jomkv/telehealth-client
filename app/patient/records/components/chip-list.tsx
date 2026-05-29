@@ -1,53 +1,76 @@
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 export default function ChipList({
   label,
+  placeholder,
   items,
   onChange,
 }: {
   label: string;
+  placeholder: string;
   items: string[];
   onChange: (items: string[]) => void;
 }) {
   const [draft, setDraft] = useState("");
 
   const add = () => {
-    if (!draft.trim()) return;
-    onChange([...items, draft.trim()]);
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+    const next = Array.from(
+      new Set([
+        ...items,
+        ...trimmed
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ]),
+    );
+    onChange(next);
     setDraft("");
   };
 
   return (
-    <div className="rounded-[2rem] bg-card p-6">
+    <div className="space-y-3">
       <Eyebrow>{label}</Eyebrow>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {items.length === 0 && (
-          <span className="text-sm text-muted-foreground">None added.</span>
-        )}
+      <div className="flex flex-wrap gap-2">
         {items.map((it) => (
-          <Badge
+          <span
             key={it}
-            variant="outline"
-            className="cursor-pointer rounded-full bg-background px-3 py-1 font-normal"
-            onClick={() => onChange(items.filter((x) => x !== it))}
+            className="inline-flex items-center gap-2 rounded-full bg-background px-3 py-1 text-sm"
           >
-            {it} ×
-          </Badge>
+            {it}
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => onChange(items.filter((x) => x !== it))}
+            >
+              ×
+            </button>
+          </span>
         ))}
       </div>
-      <div className="mt-3 flex gap-2">
+      <div className="flex gap-2">
         <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder={`Add ${label.toLowerCase().slice(0, -1)}`}
+          placeholder={placeholder}
           className="rounded-full"
           onKeyDown={(e) => {
-            if (e.key === "Enter") add();
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
           }}
         />
+        <button
+          type="button"
+          className="h-10 rounded-full border border-foreground/20 px-4 text-sm"
+          onClick={add}
+        >
+          Add
+        </button>
       </div>
     </div>
   );
