@@ -13,12 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatHour } from "@/lib/helpers/format";
-
-export type SelectedSlot = {
-  label: string;
-  time: string;
-} | null;
+import { formatDatePHT, formatHour } from "@/lib/helpers/format";
+import { SelectedSlot } from "@/@types/consultation";
 
 type BookingFormValues = {
   patientNotes: string;
@@ -28,7 +24,7 @@ type BookingDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   doctorName: string;
-  selectedSlot: SelectedSlot;
+  selectedSlot: SelectedSlot | null;
   isPending: boolean;
   onConfirm: (notes: string) => void;
 };
@@ -70,7 +66,7 @@ export function BookingDialog({
           <DialogDescription>
             {doctorName}
             {selectedSlot &&
-              ` · ${selectedSlot.label} at ${formatHour(selectedSlot.time)}`}
+              ` · ${formatDatePHT(selectedSlot.date)} at ${formatHour(selectedSlot.time)}`}
           </DialogDescription>
         </DialogHeader>
 

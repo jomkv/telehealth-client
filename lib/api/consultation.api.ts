@@ -9,6 +9,12 @@ export const consultationApi = {
     await apiInstance.post(`/consultation`, formData);
   },
 
+  async rescheduleConsultation(consultationId: string, scheduledAt: string) {
+    await apiInstance.patch(`/consultation/${consultationId}/reschedule`, {
+      scheduledAt,
+    });
+  },
+
   async cancelConsultation(consultationId: string) {
     await apiInstance.patch(`/consultation/${consultationId}/cancel`);
   },

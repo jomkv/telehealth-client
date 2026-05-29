@@ -6,31 +6,37 @@ import { useState } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
 import { StatusPill } from "@/components/ui-bits/status-pill";
 import { friendlyDay, formatDateTime, initials } from "@/lib/helpers/format";
-import { CalendarClock, RefreshCw, Video, XCircle } from "lucide-react";
+import { CalendarClock, RefreshCw, Video, XCircle, X } from "lucide-react";
 import { consultationApi } from "@/lib/api/consultation.api";
+import { doctorApi } from "@/lib/api/doctor.api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { buildScheduledAtFromDateSlot } from "@/lib/helpers/availability-slots";
+import { RescheduleDialog } from "./components/reschedule-dialog";
+import BookingScheduleSelector from "../../../../components/selectors/booking-schedule-selector";
+import { SelectedSlot } from "@/@types/consultation";
 
 export default function ConsultationDetailPage() {
+  const [isRescheduling, setIsRescheduling] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
 
-  const { data: c, isLoading } = useQuery({
+  const { data: c, isLoading: isConsultationLoading } = useQuery({
     queryKey: ["consultation", id],
     queryFn: () => consultationApi.getConsultation(id),
     enabled: !!id,
+  });
+
+  const { data: doctor } = useQuery({
+    queryKey: ["doctor", c?.doctor.id],
+    queryFn: () => doctorApi.getDoctor(c!.doctor.id),
+    enabled: isRescheduling && !!c?.doctor.id, // only fires when resched opened
   });
 
   const cancelMutation = useMutation({
@@ -43,12 +49,41 @@ export default function ConsultationDetailPage() {
     onError: () => toast.error("Failed to cancel. Please try again."),
   });
 
-  const [date, setDate] = useState<Date | undefined>();
+  const rescheduleMutation = useMutation({
+    mutationFn: (scheduledAt: string) =>
+      consultationApi.rescheduleConsultation(id, scheduledAt),
+    onSuccess: () => {
+      toast.success("Consultation rescheduled.");
+      queryClient.invalidateQueries({ queryKey: ["consultation", id] });
+      queryClient.invalidateQueries({ queryKey: ["consultations"] });
+      setDialogOpen(false);
+      setSelectedSlot(null);
+      setIsRescheduling(false);
+    },
+    onError: () => toast.error("Failed to reschedule. Please try again."),
+  });
 
-  // const reschedule = useRescheduleConsultation();
-  // const cancel = useCancelConsultation();
+  function handleInitiateBooking(date: Date, time: string) {
+    setSelectedSlot({
+      date: date,
+      time: time,
+    });
+    setDialogOpen(true);
+  }
 
-  if (isLoading) {
+  function handleConfirm() {
+    if (!doctor || !selectedSlot) return;
+    rescheduleMutation.mutate(
+      buildScheduledAtFromDateSlot(selectedSlot.date, selectedSlot.time),
+    );
+  }
+
+  function handleDismissReschedule() {
+    setIsRescheduling(false);
+    setSelectedSlot(null);
+  }
+
+  if (isConsultationLoading) {
     return (
       <div className="py-24 text-center text-muted-foreground">Loading…</div>
     );
@@ -63,14 +98,6 @@ export default function ConsultationDetailPage() {
   }
 
   const canManage = c.status === "PENDING";
-
-  const handleReschedule = () => {
-    // if (!date) return;
-    // reschedule.mutate(
-    //   { id: c.id, scheduledAt: date.toISOString() },
-    //   { onSuccess: () => toast.success("Consultation rescheduled") },
-    // );
-  };
 
   return (
     <div className="space-y-10">
@@ -123,34 +150,27 @@ export default function ConsultationDetailPage() {
 
           {canManage && (
             <>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="rounded-full">
+              <Button
+                variant={isRescheduling ? "default" : "outline"}
+                className="rounded-full"
+                onClick={() =>
+                  isRescheduling
+                    ? handleDismissReschedule()
+                    : setIsRescheduling(true)
+                }
+              >
+                {isRescheduling ? (
+                  <>
+                    <X className="mr-1.5 h-4 w-4" />
+                    Cancel reschedule
+                  </>
+                ) : (
+                  <>
                     <RefreshCw className="mr-1.5 h-4 w-4" />
                     Reschedule
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="rounded-3xl">
-                  <DialogHeader>
-                    <DialogTitle>Pick a new date</DialogTitle>
-                  </DialogHeader>
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    className="rounded-2xl border"
-                  />
-                  <DialogFooter>
-                    <Button
-                      className="rounded-full"
-                      onClick={handleReschedule}
-                      disabled={false}
-                    >
-                      Confirm
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                  </>
+                )}
+              </Button>
 
               <Button
                 variant="outline"
@@ -165,6 +185,15 @@ export default function ConsultationDetailPage() {
           )}
         </div>
       </section>
+
+      {/* Inline reschedule picker */}
+      {doctor && isRescheduling && (
+        <BookingScheduleSelector
+          doctor={doctor}
+          handleInitiateBooking={handleInitiateBooking}
+          label={"Reschedule your appointment"}
+        />
+      )}
 
       {/* Notes */}
       <section className="grid gap-6 md:grid-cols-2">
@@ -186,6 +215,19 @@ export default function ConsultationDetailPage() {
           )}
         </Block>
       </section>
+
+      {/* Reschedule confirmation dialog */}
+      <RescheduleDialog
+        open={dialogOpen}
+        onOpenChange={(next) => {
+          setDialogOpen(next);
+          if (!next) setSelectedSlot(null);
+        }}
+        doctorName={c.doctor.user.name}
+        selectedSlot={selectedSlot}
+        isPending={rescheduleMutation.isPending}
+        onConfirm={handleConfirm}
+      />
     </div>
   );
 }

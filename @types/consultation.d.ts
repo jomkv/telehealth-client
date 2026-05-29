@@ -25,3 +25,8 @@ export type CreateConsultationInput = Pick<
   Consultation,
   "doctorId" | "scheduledAt" | "patientNotes"
 >;
+
+export type SelectedSlot = {
+  date: Date;
+  time: string;
+};

@@ -1,32 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { PageHeader } from "@/components/nav/page-header";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { formatHour, initials } from "@/lib/helpers/format";
-import {
-  buildBookedSlotRange,
-  buildSchedule,
-  buildScheduledAtFromDateSlot,
-  buildUpcomingDateOptions,
-  dayKeyFromDate,
-  isSameDay,
-  slotToUtcIso,
-} from "@/lib/helpers/availability-slots";
+import { initials } from "@/lib/helpers/format";
+import { buildScheduledAtFromDateSlot } from "@/lib/helpers/availability-slots";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { doctorApi } from "@/lib/api/doctor.api";
 import { consultationApi } from "@/lib/api/consultation.api";
 import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
 import { BookingDialog } from "./components/booking-dialog";
-import { PHT_TZ } from "@/lib/constants";
-
-type SelectedSlot = {
-  time: string;
-} | null;
+import BookingScheduleSelector from "@/components/selectors/booking-schedule-selector";
+import { SelectedSlot } from "@/@types/consultation";
 
 export default function DoctorDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -43,90 +31,8 @@ export default function DoctorDetailPage() {
 
   const queryClient = useQueryClient();
 
-  const schedule = useMemo(
-    () => (doctor ? buildSchedule(doctor.availability) : []),
-    [doctor],
-  );
-
-  const scheduleByDay = useMemo(
-    () => new Map(schedule.map(({ day, slots }) => [day, slots])),
-    [schedule],
-  );
-
-  const dateOptions = useMemo(
-    () => buildUpcomingDateOptions(schedule, 21),
-    [schedule],
-  );
-
-  const [selectedSlot, setSelectedSlot] = useState<SelectedSlot>(null);
+  const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
   const [open, setOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (dateOptions.length === 0) {
-      setSelectedDate(null);
-      return;
-    }
-
-    const stillValid =
-      selectedDate &&
-      dateOptions.some((option) => isSameDay(option.date, selectedDate));
-
-    if (!stillValid) {
-      setSelectedDate(dateOptions[0].date);
-      setSelectedSlot(null);
-    }
-  }, [dateOptions, selectedDate]);
-
-  // Fetch booked slots for the full horizon and exclude them from visible slots.
-  useEffect(() => {
-    if (!doctor || dateOptions.length === 0) return;
-
-    const { from, to } = buildBookedSlotRange(dateOptions);
-
-    let mounted = true;
-    (async () => {
-      try {
-        const full = await doctorApi.getDoctor(doctor.id, from, to);
-        if (!mounted) return;
-        setBookedSlots(full.bookedSlots ?? []);
-        try {
-          queryClient.setQueryData(["doctor", doctor.id], full);
-        } catch {}
-      } catch {}
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [doctor, dateOptions]);
-
-  const selectedDay = selectedDate ? dayKeyFromDate(selectedDate) : null;
-  const selectedSlots = selectedDay
-    ? (scheduleByDay.get(selectedDay) ?? [])
-    : [];
-
-  const visibleSlots = useMemo(() => {
-    if (!selectedDate) return [];
-
-    const now = new Date();
-    const candidates = isSameDay(selectedDate, now)
-      ? selectedSlots.filter((time) => {
-          const [hours] = time.split(":").map(Number);
-          const slotDate = new Date(selectedDate);
-          slotDate.setHours(hours, 0, 0, 0);
-          return slotDate > now;
-        })
-      : selectedSlots;
-
-    if (bookedSlots.length === 0) return candidates;
-
-    const bookedSet = new Set(bookedSlots);
-    return candidates.filter((time) => {
-      const [hours] = time.split(":").map(Number);
-      return !bookedSet.has(slotToUtcIso(selectedDate, hours));
-    });
-  }, [selectedDate, selectedSlots, bookedSlots]);
 
   const createConsultation = useMutation({
     mutationFn: consultationApi.createConsultation,
@@ -141,19 +47,21 @@ export default function DoctorDetailPage() {
     },
   });
 
-  function handleSlotClick(time: string) {
-    if (!selectedDate) return;
-    setSelectedSlot({ time });
+  function handleInitiateBooking(date: Date, time: string) {
+    setSelectedSlot({
+      date: date,
+      time: time,
+    });
     setOpen(true);
   }
 
   function handleBook(patientNotes: string) {
-    if (!doctor || !selectedSlot || !selectedDate) return;
+    if (!doctor || !selectedSlot) return;
 
     createConsultation.mutate({
       patientNotes,
       scheduledAt: buildScheduledAtFromDateSlot(
-        selectedDate,
+        selectedSlot.date,
         selectedSlot.time,
       ),
       doctorId: doctor.id,
@@ -227,76 +135,13 @@ export default function DoctorDetailPage() {
       </section>
 
       {/* Availability + booking */}
-      <section>
-        <PageHeader
-          eyebrow="Book a slot"
-          title="Available times"
-          description="Pick a date first, then select a 1-hour slot. You'll confirm with a short note about your concern."
+      {doctor && (
+        <BookingScheduleSelector
+          doctor={doctor}
+          handleInitiateBooking={handleInitiateBooking}
+          label={"Schedule an appointent"}
         />
-
-        {dateOptions.length === 0 ? (
-          <p className="py-12 text-center text-muted-foreground">
-            No availability published right now.
-          </p>
-        ) : (
-          <div className="mt-8 space-y-8">
-            <div>
-              <p className="mb-3 text-sm font-medium text-foreground">
-                Choose a date
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {dateOptions.map((option) => {
-                  const isSelected =
-                    selectedDate && isSameDay(option.date, selectedDate);
-
-                  return (
-                    <button
-                      key={option.date.toISOString()}
-                      onClick={() => setSelectedDate(option.date)}
-                      className={`rounded-full border px-4 py-2 text-sm transition ${
-                        isSelected
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border bg-background hover:bg-foreground hover:text-background"
-                      }`}
-                      aria-pressed={isSelected}
-                    >
-                      {new Intl.DateTimeFormat("en-US", {
-                        timeZone: PHT_TZ,
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                      }).format(option.date)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-3 text-sm font-medium text-foreground">
-                Available times
-              </p>
-              {selectedDate && visibleSlots.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No remaining slots for this date.
-                </p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {visibleSlots.map((time) => (
-                    <button
-                      key={time}
-                      onClick={() => handleSlotClick(time)}
-                      className="rounded-full border border-border bg-background px-4 py-2 text-sm transition hover:bg-foreground hover:text-background"
-                    >
-                      {formatHour(time)}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </section>
+      )}
 
       {/* Booking dialog — controlled single instance, no per-slot Dialog mount */}
       <BookingDialog
@@ -308,19 +153,7 @@ export default function DoctorDetailPage() {
           }
         }}
         doctorName={doctor.user.name}
-        selectedSlot={
-          selectedSlot && selectedDate
-            ? {
-                label: new Intl.DateTimeFormat("en-US", {
-                  timeZone: PHT_TZ,
-                  weekday: "short",
-                  month: "short",
-                  day: "numeric",
-                }).format(selectedDate),
-                time: selectedSlot.time,
-              }
-            : null
-        }
+        selectedSlot={selectedSlot}
         isPending={createConsultation.isPending}
         onConfirm={handleBook}
       />

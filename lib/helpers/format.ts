@@ -5,6 +5,7 @@ import {
   isTomorrow,
   isYesterday,
 } from "date-fns";
+import { PHT_TZ } from "../constants";
 
 export const formatDate = (d: string | Date) =>
   format(new Date(d), "MMM d, yyyy");
@@ -18,6 +19,14 @@ export const formatHour = (time: string): string => {
   const period = h < 12 ? "AM" : "PM";
   const display = h % 12 === 0 ? 12 : h % 12;
   return `${display}:00 ${period}`;
+};
+export const formatDatePHT = (date: Date): string => {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: PHT_TZ,
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(date);
 };
 
 export const friendlyDay = (d: string | Date) => {
