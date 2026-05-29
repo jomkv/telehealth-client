@@ -20,7 +20,10 @@ const isNumeric = (value: string) =>
   value.split("").every((char) => char >= "0" && char <= "9");
 
 const signupSchema = z.object({
-  name: z.string().min(1, "Name is required."),
+  name: z
+    .string()
+    .min(1, "Name is required.")
+    .max(100, "Name must not 100 exceed characters."),
   email: z.string().email("Enter valid email."),
   password: z.string().min(6, "Password must be at least 6 characters."),
   role: z.enum(roleOptions, {
@@ -191,6 +194,7 @@ export default function SignupPage() {
                 type="text"
                 inputMode="numeric"
                 placeholder="10-digit number"
+                maxLength={10}
                 className="h-full flex-1 bg-transparent outline-none"
                 {...register("mobileNumber")}
               />
