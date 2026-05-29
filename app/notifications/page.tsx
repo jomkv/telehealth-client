@@ -6,13 +6,35 @@ import { Button } from "@/components/ui/button";
 import { useUserStore } from "../store";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Notification } from "@/@types/notification";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { notificationApi } from "@/lib/api/notification.api";
+import { toast } from "sonner";
 
 export default function NotificationsPage() {
   const user = useUserStore((s) => s.user);
+  const hydrated = useUserStore((s) => s.hydrated);
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: notificationApi.getAll,
+  });
+
+  const markAllRead = useMutation({
+    mutationFn: notificationApi.markAllRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      toast.success("Marked all as read");
+    },
+    onError: () => {
+      toast.error("Something went wrong, please try again later");
+    },
+  });
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (!user) {
       router.replace("/login");
     }
@@ -20,10 +42,8 @@ export default function NotificationsPage() {
     if (user && !user.isOnboarded) {
       router.replace("/onboarding");
     }
-  }, [user, router]);
+  }, [user, router, hydrated]);
 
-  // TODO: query
-  const items: Notification[] = [];
   const unread = items.filter((n) => !n.isRead).length;
 
   return (
@@ -36,7 +56,8 @@ export default function NotificationsPage() {
           <Button
             variant="outline"
             className="rounded-full"
-            disabled={unread === 0}
+            disabled={unread === 0 || isLoading || markAllRead.isPending}
+            onClick={() => markAllRead.mutate()}
           >
             Mark all read
           </Button>

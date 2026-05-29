@@ -1,3 +1,5 @@
+"use client";
+
 import { Bell } from "lucide-react";
 import {
   DropdownMenu,
@@ -9,10 +11,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { fromNow } from "@/lib/helpers/format";
 import Link from "next/link";
-import { notifications } from "@/lib/mock-data/notification";
+import { useQuery } from "@tanstack/react-query";
+import { notificationApi } from "@/lib/api/notification.api";
 
 export function NotificationBell() {
-  const unread = notifications.filter((n) => !n.isRead).length;
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: notificationApi.getLatest,
+  });
+
+  const unread = items.filter((n) => !n.isRead).length;
 
   return (
     <DropdownMenu>
@@ -32,7 +40,10 @@ export function NotificationBell() {
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {notifications.slice(0, 4).map((n) => (
+        {items.length === 0 && (
+          <p className="text-center font-extralight py-5">No notifications</p>
+        )}
+        {items.slice(0, 4).map((n) => (
           <DropdownMenuItem
             key={n.id}
             className="flex flex-col items-start gap-1 py-3"
