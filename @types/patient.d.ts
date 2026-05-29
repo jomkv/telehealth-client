@@ -11,6 +11,10 @@ export interface Patient {
   notes?: string;
 }
 
+export interface PopulatedPatient extends Patient {
+  user: User;
+}
+
 export interface OnboardPatientInput {
   weight: number;
   height: number;
@@ -20,6 +24,4 @@ export interface OnboardPatientInput {
   notes?: string;
 }
 
-export interface PopulatedPatient extends Patient {
-  user: User;
-}
+export type UpdatePatientInput = OnboardPatientInput;

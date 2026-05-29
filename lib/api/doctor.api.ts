@@ -3,8 +3,11 @@ import {
   PopulatedDoctorWithAvailability,
   Specialization,
   SymptomSearchResult,
+  UpdateDoctorInput,
 } from "@/@types/doctor";
 import { apiInstance } from "./api";
+import { UpdatePatientInput } from "@/@types/patient";
+import { MeUser } from "@/@types/user";
 
 export const doctorApi = {
   async getDoctor(
@@ -44,5 +47,10 @@ export const doctorApi = {
         "/doctor/specializations",
       )
     ).data.data;
+  },
+
+  async updateMe(formData: UpdateDoctorInput): Promise<MeUser> {
+    return (await apiInstance.patch<{ data: MeUser }>("/doctor/me", formData))
+      .data.data;
   },
 };

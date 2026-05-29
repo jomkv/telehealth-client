@@ -36,3 +36,5 @@ export interface OnboardDoctorInput {
   bio?: string;
   yearsOfPractice?: number;
 }
+
+export type UpdateDoctorInput = OnboardDoctorInput;
