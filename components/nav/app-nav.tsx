@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { initials } from "@/lib/helpers/format";
@@ -93,6 +94,13 @@ export function AppNav() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40 rounded-md">
+            {links.map((l) => (
+              <DropdownMenuItem asChild key={l.to} className="md:hidden">
+                <Link href={l.to}>{l.label}</Link>
+              </DropdownMenuItem>
+            ))}
+
+            <DropdownMenuSeparator className="md:hidden" />
             <DropdownMenuItem asChild>
               <Link href="/profile">Profile</Link>
             </DropdownMenuItem>
