@@ -1,4 +1,5 @@
 import { DoctorCard } from "@/components/cards/doctor-card";
+import Empty from "@/components/ui-bits/empty";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -57,7 +58,11 @@ export default function BrowsePanel() {
             className="rounded-full pl-10"
           />
         </div>
-        <Select value={specId} onValueChange={setSpecId} disabled={isPending}>
+        <Select
+          value={specId}
+          onValueChange={setSpecId}
+          disabled={isPending || isLoading || isFetching}
+        >
           <SelectTrigger className="w-[220px] rounded-full">
             <SelectValue placeholder="Specialization" />
           </SelectTrigger>
@@ -88,9 +93,7 @@ export default function BrowsePanel() {
           ))}
         </div>
       ) : filteredDoctors.length === 0 ? (
-        <div className="rounded-[2rem] bg-card p-12 text-center text-muted-foreground">
-          No doctors match your search.
-        </div>
+        <Empty label="No doctors match your search." />
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
           {filteredDoctors.map((d) => (

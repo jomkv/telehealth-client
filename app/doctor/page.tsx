@@ -13,10 +13,11 @@ import {
   filterUpcomingConsultations,
   getConsultationCounts,
 } from "@/lib/helpers/consultation-counts";
+import Empty from "@/components/ui-bits/empty";
 
 export default function DoctorHomePage() {
   const user = useUserStore((s) => s.user);
-  const { data: consults = [] } = useQuery({
+  const { data: consults = [], isLoading } = useQuery({
     queryKey: ["consultations", "doctor", user?.doctor?.id],
     queryFn: consultationApi.getMyConsultations,
     enabled: !!user?.doctor?.id,
@@ -70,10 +71,10 @@ export default function DoctorHomePage() {
       {/* Today's timeline */}
       <section className="space-y-4">
         <Eyebrow>Today&rsquo;s timeline</Eyebrow>
-        {todayCount.length === 0 ? (
-          <div className="rounded-[2rem] bg-card p-12 text-center text-muted-foreground">
-            Nothing scheduled for today. Enjoy the breathing room.
-          </div>
+        {isLoading ? (
+          <Empty label="Loading your schedule..." />
+        ) : todayCount.length === 0 ? (
+          <Empty label="Nothing scheduled for today. Enjoy the breathing room." />
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {todayCount.map((c) => (

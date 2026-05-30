@@ -14,6 +14,7 @@ import {
   filterUpcomingConsultations,
   getConsultationCounts,
 } from "@/lib/helpers/consultation-counts";
+import Empty from "@/components/ui-bits/empty";
 
 function ActionCard({
   href,
@@ -72,7 +73,7 @@ export default function PatientHome() {
         />
         <StatCard
           label="Completed"
-          value={isLoading ? "—" : completedCount || "—"}
+          value={isLoading ? "—" : (completedCount ?? 0)}
           hint="lifetime visits"
         />
         <StatCard
@@ -87,13 +88,11 @@ export default function PatientHome() {
         <div className="lg:col-span-2 space-y-4">
           <Eyebrow>Next visit</Eyebrow>
           {isLoading ? (
-            <div className="rounded-[2rem] bg-card p-8 animate-pulse h-32" />
+            <Empty label="Loading upcoming consultations..." />
           ) : next ? (
             <ConsultationCard consultation={next} viewerRole="PATIENT" />
           ) : (
-            <div className="rounded-[2rem] bg-card p-8 text-muted-foreground">
-              No upcoming consultations.
-            </div>
+            <Empty label="No upcoming consultations." />
           )}
         </div>
 

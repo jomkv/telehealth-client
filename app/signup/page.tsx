@@ -13,6 +13,7 @@ import { userApi } from "@/lib/api/user.api";
 import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
 import { useEffect } from "react";
 import { useUserStore } from "../store";
+import { getYesterdayString } from "@/lib/helpers/max-date";
 
 const roleOptions = ["PATIENT", "DOCTOR"] as const;
 
@@ -100,7 +101,7 @@ export default function SignupPage() {
       }
     >
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-[0.22em] text-[#696969]">
               Full name
@@ -166,15 +167,16 @@ export default function SignupPage() {
           ) : null}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-[0.22em] text-[#696969]">
               Birthday
             </label>
             <input
               type="date"
-              className="h-12 w-full rounded-full border border-[#141413]/15 bg-white px-5 text-base text-[#141413] shadow-[inset_0_0_0_1px_rgba(20,20,19,0.04)] outline-none focus-visible:ring-2 focus-visible:ring-[#141413]/20"
+              className="h-12 w-full min-w-0 rounded-full border border-[#141413]/15 bg-white px-5 text-base text-[#141413] shadow-[inset_0_0_0_1px_rgba(20,20,19,0.04)] outline-none focus-visible:ring-2 focus-visible:ring-[#141413]/20"
               {...register("birthday")}
+              max={getYesterdayString()}
             />
             {errors.birthday ? (
               <p className="text-xs text-[#CF4500]">
@@ -187,7 +189,7 @@ export default function SignupPage() {
             <label className="text-xs font-bold uppercase tracking-[0.22em] text-[#696969]">
               Mobile number
             </label>
-            <div className="flex h-12 items-center rounded-full border border-[#141413]/15 bg-white px-4 text-base text-[#141413] shadow-[inset_0_0_0_1px_rgba(20,20,19,0.04)] focus-within:ring-2 focus-within:ring-[#141413]/20">
+            <div className="flex h-12 items-center overflow-hidden rounded-full border border-[#141413]/15 bg-white px-4 text-base text-[#141413] shadow-[inset_0_0_0_1px_rgba(20,20,19,0.04)] focus-within:ring-2 focus-within:ring-[#141413]/20">
               <span className="text-sm font-semibold">+63</span>
               <span className="mx-3 h-6 w-px bg-[#141413]/15" />
               <input
@@ -195,7 +197,7 @@ export default function SignupPage() {
                 inputMode="numeric"
                 placeholder="10-digit number"
                 maxLength={10}
-                className="h-full flex-1 bg-transparent outline-none"
+                className="h-full flex-1 min-w-0 bg-transparent outline-none"
                 {...register("mobileNumber")}
               />
             </div>

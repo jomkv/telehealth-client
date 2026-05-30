@@ -26,7 +26,9 @@ export default function NotificationsPage() {
   const markAllRead = useMutation({
     mutationFn: notificationApi.markAllRead,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notifications", "notifications-latest"],
+      });
       toast.success("Marked all as read");
     },
     onError: () => {

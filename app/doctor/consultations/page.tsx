@@ -11,19 +11,12 @@ import {
   filterPastConsultations,
   filterUpcomingConsultations,
 } from "@/lib/helpers/consultation-counts";
-
-function Empty({ label }: { label: string }) {
-  return (
-    <div className="col-span-full rounded-[2rem] bg-card p-12 text-center text-muted-foreground">
-      {label}
-    </div>
-  );
-}
+import Empty from "@/components/ui-bits/empty";
 
 export default function DoctorConsultationsPage() {
   const user = useUserStore((s) => s.user);
 
-  const { data: all = [] } = useQuery({
+  const { data: all = [], isLoading } = useQuery({
     queryKey: ["consultations", "doctor", user?.doctor?.id],
     queryFn: consultationApi.getMyConsultations,
     enabled: !!user?.doctor?.id,
@@ -43,19 +36,34 @@ export default function DoctorConsultationsPage() {
 
       <Tabs defaultValue="upcoming" className="space-y-6">
         <TabsList className="rounded-full bg-card p-1">
-          <TabsTrigger value="upcoming" className="rounded-full">
+          <TabsTrigger
+            value="upcoming"
+            className="rounded-full"
+            disabled={isLoading}
+          >
             Upcoming · {upcoming.length}
           </TabsTrigger>
-          <TabsTrigger value="past" className="rounded-full">
+          <TabsTrigger
+            value="past"
+            className="rounded-full"
+            disabled={isLoading}
+          >
             Past · {past.length}
           </TabsTrigger>
-          <TabsTrigger value="cancelled" className="rounded-full">
+          <TabsTrigger
+            value="cancelled"
+            className="rounded-full"
+            disabled={isLoading}
+          >
             Cancelled · {cancelled.length}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="upcoming" className="grid gap-4 md:grid-cols-2">
-          {upcoming.length === 0 && <Empty label="Nothing upcoming." />}
+          {isLoading && <Empty label="Loading consultations..." />}
+          {!isLoading && upcoming.length === 0 && (
+            <Empty label="Nothing upcoming." />
+          )}
           {upcoming.map((c) => (
             <ConsultationCard key={c.id} consultation={c} viewerRole="DOCTOR" />
           ))}

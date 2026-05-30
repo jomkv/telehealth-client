@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
-import { formatDate, initials } from "@/lib/helpers/format";
+import { formatDate } from "@/lib/helpers/format";
 import { useUserStore } from "@/app/store";
 import { consultationApi } from "@/lib/api/consultation.api";
 import { patientApi } from "@/lib/api/patient.api";
+import { UserAvatar } from "@/components/avatars/user-avatar";
+import Empty from "@/components/ui-bits/empty";
 
 function Card({ label, items }: { label: string; items: string[] }) {
   return (
@@ -77,12 +78,13 @@ export default function PatientRecordPage() {
 
       {/* Profile header */}
       <section className="flex flex-wrap items-start gap-6 rounded-[2.5rem] bg-card p-8">
-        <Avatar className="h-24 w-24 ring-1 ring-border">
-          <AvatarFallback className="bg-muted text-xl">
-            {initials(patient.user.name)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="min-w-[240px] flex-1">
+        <UserAvatar
+          name={patient.user.name}
+          src={patient.user.profilePic}
+          className="h-24 w-24 ring-1 ring-border"
+          fallbackClassName="bg-muted text-xl"
+        />
+        <div className="min-w-60 flex-1">
           <Eyebrow>Patient</Eyebrow>
           <h1 className="mt-3 text-3xl">{patient.user.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -114,9 +116,7 @@ export default function PatientRecordPage() {
       <section className="space-y-4">
         <Eyebrow>Your consultation history with this patient</Eyebrow>
         {past.length === 0 ? (
-          <div className="rounded-[2rem] bg-card p-12 text-center text-muted-foreground">
-            No completed consultations with this patient yet.
-          </div>
+          <Empty label="No completed consultations with this patient yet." />
         ) : (
           past.map((c) => (
             <div key={c.id} className="rounded-[2rem] bg-card p-6">

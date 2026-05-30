@@ -114,16 +114,6 @@ export default function LoginPage() {
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between text-sm text-[#555555]">
-          <span>Use same credentials as your provider invite.</span>
-          <button
-            type="button"
-            className="font-medium text-[#141413] underline"
-          >
-            Forgot password
-          </button>
-        </div>
-
         <Button
           type="submit"
           className="h-12 w-full rounded-full bg-[#141413] text-[#F3F0EE] hover:bg-[#141413]/90"

@@ -7,51 +7,49 @@ import { doctorApi } from "@/lib/api/doctor.api";
 import { useQuery } from "@tanstack/react-query";
 import { Sparkles, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
 import type { SymptomSearchResult } from "@/@types/doctor";
+import Empty from "@/components/ui-bits/empty";
+
+const schema = z.object({
+  symptoms: z
+    .string()
+    .min(8, "Please describe your symptoms (at least 8 characters).")
+    .max(200, "Please keep symptoms under 200 characters."),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 export default function AIPanel() {
-  const [symptoms, setSymptoms] = useState("");
-  const [showResults, setShowResults] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [submittedQuery, setSubmittedQuery] = useState<string | null>(null);
 
-  function handleReset() {
-    setShowResults(false);
-    setSymptoms("");
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { symptoms: "" },
+  });
 
-  const { data, isLoading, isFetching, refetch, error } =
+  const { data, isLoading, isFetching, error, isSuccess } =
     useQuery<SymptomSearchResult>({
-      queryKey: ["symptom-search", symptoms],
-      queryFn: () => doctorApi.searchSymptom(symptoms.trim()),
-      enabled: false,
+      queryKey: ["symptom-search", submittedQuery],
+      queryFn: () => doctorApi.searchSymptom(submittedQuery!),
+      enabled: !!submittedQuery,
     });
 
-  const handleSubmit = async () => {
-    const trimmed = symptoms.trim();
+  const onSubmit = ({ symptoms }: FormValues) => {
+    setSubmittedQuery(symptoms.trim());
+  };
 
-    if (trimmed.length === 0) {
-      setFetchError("Please describe your symptoms.");
-      return;
-    }
-
-    if (trimmed.length > 200) {
-      setFetchError("Please keep symptoms under 200 characters.");
-      return;
-    }
-
-    setFetchError(null);
-
-    try {
-      const result = await refetch();
-      if (result.error) {
-        setFetchError(extractErrorMessage(result.error));
-      }
-
-      setShowResults(true);
-    } catch (err) {
-      setFetchError(extractErrorMessage(err));
-    }
+  const handleReset = () => {
+    setSubmittedQuery(null);
+    reset();
   };
 
   return (
@@ -63,44 +61,48 @@ export default function AIPanel() {
           Be specific — duration, severity, anything you&rsquo;ve tried.
           We&rsquo;ll match you to the right specialist.
         </p>
-        <Textarea
-          rows={4}
-          value={symptoms}
-          onChange={(e) => setSymptoms(e.target.value)}
-          placeholder="e.g. Sharp chest pain when exercising, started 3 days ago. No history of heart issues."
-          className="mt-4"
-        />
-        <div className="mt-4 flex gap-2">
-          <Button
-            onClick={handleSubmit}
-            disabled={symptoms.trim().length < 8 || isFetching}
-            className="rounded-full"
-          >
-            {isFetching ? (
-              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-            ) : (
-              <Sparkles className="mr-1.5 h-4 w-4" />
-            )}
-            {isFetching ? "Finding..." : "Find specialists"}
-          </Button>
-
-          {showResults && (
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Textarea
+            rows={4}
+            placeholder="e.g. Sharp chest pain when exercising, started 3 days ago. No history of heart issues."
+            className="mt-4"
+            {...register("symptoms")}
+          />
+          {errors.symptoms && (
+            <p className="mt-1.5 text-xs text-destructive">
+              {errors.symptoms.message}
+            </p>
+          )}
+          <div className="mt-4 flex gap-2">
             <Button
-              variant="outline"
-              onClick={handleReset}
+              type="submit"
+              disabled={isFetching}
               className="rounded-full"
             >
-              Reset
+              {isFetching ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-1.5 h-4 w-4" />
+              )}
+              {isFetching ? "Finding..." : "Find specialists"}
             </Button>
-          )}
-        </div>
+            {!isLoading && isSuccess && submittedQuery && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleReset}
+                className="rounded-full"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        </form>
       </div>
 
-      {showResults && (
+      {submittedQuery && (
         <div className="space-y-4">
           <Eyebrow>Top matches</Eyebrow>
-
-          {/* specializations */}
           {data?.specializations && data.specializations.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {data.specializations.map((s) => (
@@ -114,25 +116,21 @@ export default function AIPanel() {
               ))}
             </div>
           )}
-
           <div className="grid gap-6 md:grid-cols-2">
             {isLoading || isFetching ? (
-              <div className="col-span-full flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" /> Searching for
-                matches
-              </div>
+              <Empty label="Looking for doctors..." />
             ) : Array.isArray(data?.doctors) && data!.doctors.length > 0 ? (
               data!.doctors.map((d: any) => (
                 <DoctorCard key={d.id} doctor={d} />
               ))
             ) : (
-              <div className="col-span-full rounded-[1rem] bg-muted p-6 text-sm text-muted-foreground">
-                {fetchError
-                  ? fetchError
-                  : error
+              <Empty
+                label={
+                  error
                     ? extractErrorMessage(error)
-                    : "No matches found. Try adding more detail or changing symptoms."}
-              </div>
+                    : "No matches found. Try adding more detail or changing symptoms."
+                }
+              />
             )}
           </div>
         </div>

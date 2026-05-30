@@ -11,11 +11,12 @@ import {
   filterPastConsultations,
   filterUpcomingConsultations,
 } from "@/lib/helpers/consultation-counts";
+import Empty from "@/components/ui-bits/empty";
 
 export default function ConsultationsPage() {
   const user = useUserStore((s) => s.user);
 
-  const { data: all = [] } = useQuery({
+  const { data: all = [], isLoading } = useQuery({
     queryKey: ["consultations", "doctor", user?.doctor?.id],
     queryFn: consultationApi.getMyConsultations,
     enabled: !!user?.patient?.id,
@@ -47,7 +48,8 @@ export default function ConsultationsPage() {
         </TabsList>
 
         <TabsContent value="upcoming" className="grid gap-4 md:grid-cols-2">
-          {upcoming.length === 0 && (
+          {isLoading && <Empty label="Loading consultations..." />}
+          {!isLoading && upcoming.length === 0 && (
             <Empty label="No upcoming consultations." />
           )}
           {upcoming.map((c) => (
@@ -81,14 +83,6 @@ export default function ConsultationsPage() {
           ))}
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-function Empty({ label }: { label: string }) {
-  return (
-    <div className="col-span-full rounded-[2rem] bg-card p-12 text-center text-muted-foreground">
-      {label}
     </div>
   );
 }

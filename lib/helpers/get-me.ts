@@ -10,7 +10,6 @@ export async function getMe(): Promise<MeUser | null> {
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
-  console.log("cookies found:", allCookies); // check Vercel logs
   if (!allCookies) return null;
 
   try {

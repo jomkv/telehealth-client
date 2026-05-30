@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { MeUser } from "@/@types/user";
 import { useUserStore } from "@/app/store";
 import { formatIsoDate } from "@/lib/helpers/format";
+import { toast } from "sonner";
 
 const updateUserSchema = z.object({
   password: z
@@ -127,6 +128,7 @@ export function UpdateUserForm({
     }
 
     await onSubmit?.(payload);
+    toast.success("Profile updated");
     resetField("profilePic");
     resetField("password");
   }

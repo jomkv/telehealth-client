@@ -33,12 +33,12 @@ export function AuthShell({
             className,
           )}
         >
-          <div className="grid gap-12 px-8 py-12 md:grid-cols-[1.1fr_1fr] md:px-14">
+          <div className="grid gap-12 px-8 py-12 md:grid-cols-[1.1fr_1fr] md:px-14 grid-cols-1">
             <div className="flex flex-col justify-between gap-8">
               <div className="space-y-5">
                 <p className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.28em] text-[#CF4500]">
                   <span className="size-2 rounded-full bg-[#CF4500]" />
-                  Telehealth Access
+                  Medra Access
                 </p>
                 <h1 className="text-4xl font-medium tracking-[-0.02em] md:text-5xl">
                   {title}
@@ -51,8 +51,8 @@ export function AuthShell({
                 <div className="flex size-16 items-center justify-center rounded-full bg-white shadow-[0_16px_30px_rgba(0,0,0,0.08)]">
                   <span className="text-2xl">→</span>
                 </div>
-                <p className="text-sm font-[450] text-[#555555]">
-                  Secure, private access to your care team.
+                <p className="text-sm font-[450] text-[#555555] mt-2">
+                  Secure access to AI recommended doctors.
                 </p>
               </div>
             </div>

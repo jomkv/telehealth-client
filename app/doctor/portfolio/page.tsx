@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
 import { useWatch } from "react-hook-form";
+import Empty from "@/components/ui-bits/empty";
 
 const toOptionalNumber = (value: unknown) => {
   if (value === "" || value === null || value === undefined) {
@@ -80,7 +81,7 @@ export default function PortfolioPage() {
     mutationFn: doctorApi.updateMe,
   });
 
-  const { data: all = [] } = useQuery({
+  const { data: all = [], isLoading } = useQuery({
     queryKey: ["consultations", "doctor", user?.doctor?.id],
     queryFn: consultationApi.getMyConsultations,
     enabled: !!user?.doctor?.id,
@@ -190,7 +191,10 @@ export default function PortfolioPage() {
                 value={field.value}
                 onValueChange={field.onChange}
                 disabled={
-                  isSpecializationsPending || saveProfile.isPending || !hydrated
+                  isSpecializationsPending ||
+                  saveProfile.isPending ||
+                  !hydrated ||
+                  isSubmitting
                 }
               >
                 <SelectTrigger className="mt-3 w-full">
@@ -258,9 +262,11 @@ export default function PortfolioPage() {
               isSpecializationsPending
             }
           >
-            {isSubmitting || saveProfile.isPending
-              ? "Saving..."
-              : "Apply Changes"}
+            {isSpecializationsPending
+              ? "Loading..."
+              : isSubmitting || saveProfile.isPending
+                ? "Saving..."
+                : "Apply Changes"}
           </Button>
         </div>
         {errors.root?.message ? (
@@ -273,10 +279,9 @@ export default function PortfolioPage() {
       <section className="space-y-4">
         <Eyebrow>Consultation history</Eyebrow>
 
-        {past.length === 0 && (
-          <div className="rounded-[2rem] bg-card p-12 text-center text-muted-foreground">
-            No consultations done yet.
-          </div>
+        {isLoading && <Empty label="Loading consultation history..." />}
+        {!isLoading && past.length === 0 && (
+          <Empty label="No consultations done yet." />
         )}
 
         <div className="space-y-4">

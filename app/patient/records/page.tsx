@@ -19,6 +19,7 @@ import { useMutation } from "@tanstack/react-query";
 import { patientApi } from "@/lib/api/patient.api";
 import { toast } from "sonner";
 import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
+import Empty from "@/components/ui-bits/empty";
 
 const toNumber = (value: unknown) => {
   if (value === "" || value === null || value === undefined) {
@@ -264,11 +265,7 @@ export default function RecordsPage() {
       <section className="space-y-4">
         <Eyebrow>Consultation history</Eyebrow>
 
-        {past.length === 0 && (
-          <div className="rounded-[2rem] bg-card p-12 text-center text-muted-foreground">
-            No completed consultations yet.
-          </div>
-        )}
+        {past.length === 0 && <Empty label="No completed consultations yet." />}
 
         <div className="space-y-4">
           {past.map((c) => (

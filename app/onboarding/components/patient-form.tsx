@@ -49,9 +49,18 @@ const patientSchema = z.object({
       })
       .positive("Height must be greater than 0."),
   ),
-  conditions: z.preprocess(toOptionalArray, z.array(z.string()).optional()),
-  allergies: z.preprocess(toOptionalArray, z.array(z.string()).optional()),
-  medications: z.preprocess(toOptionalArray, z.array(z.string()).optional()),
+  conditions: z.preprocess(
+    toOptionalArray,
+    z.array(z.string()).max(30, "Max of 30 conditions").optional(),
+  ),
+  allergies: z.preprocess(
+    toOptionalArray,
+    z.array(z.string()).max(30, "Max of 30 allergies").optional(),
+  ),
+  medications: z.preprocess(
+    toOptionalArray,
+    z.array(z.string()).max(30, "Max of 30 medications").optional(),
+  ),
   notes: z.preprocess(
     (value) => (value === "" ? undefined : value),
     z.string().max(600, "Keep notes under 600 characters.").optional(),
