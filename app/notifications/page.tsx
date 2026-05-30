@@ -9,12 +9,14 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { notificationApi } from "@/lib/api/notification.api";
 import { toast } from "sonner";
+import { useSocketContext } from "@/components/providers/socket-provider";
 
 export default function NotificationsPage() {
   const user = useUserStore((s) => s.user);
   const hydrated = useUserStore((s) => s.hydrated);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { socket } = useSocketContext();
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["notifications"],
@@ -43,6 +45,21 @@ export default function NotificationsPage() {
       router.replace("/onboarding");
     }
   }, [user, router, hydrated]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("notification", (newNotif) => {
+      queryClient.setQueryData(["notifications"], (prev: typeof items) => [
+        newNotif,
+        ...(prev ?? []),
+      ]);
+    });
+
+    return () => {
+      socket.off("notification");
+    };
+  }, [socket, queryClient]);
 
   const unread = items.filter((n) => !n.isRead).length;
 

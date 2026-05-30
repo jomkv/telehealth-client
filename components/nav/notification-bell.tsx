@@ -11,14 +11,33 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { fromNow } from "@/lib/helpers/format";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { notificationApi } from "@/lib/api/notification.api";
+import { useEffect } from "react";
+import { useSocketContext } from "../providers/socket-provider";
 
 export function NotificationBell() {
   const { data: items = [], isLoading } = useQuery({
-    queryKey: ["notifications"],
+    queryKey: ["notifications-latest"],
     queryFn: notificationApi.getLatest,
   });
+
+  const queryClient = useQueryClient();
+  const { socket } = useSocketContext();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("notification", (newNotif) => {
+      queryClient.setQueryData(["notifications-latest"], (prev: typeof items) =>
+        [newNotif, ...(prev ?? [])].slice(0, 4),
+      );
+    });
+
+    return () => {
+      socket.off("notification");
+    };
+  }, [socket, queryClient]);
 
   const unread = items.filter((n) => !n.isRead).length;
 
