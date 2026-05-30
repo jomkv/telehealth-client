@@ -1,6 +1,11 @@
 import { OnboardDoctorInput } from "@/@types/doctor";
 import { OnboardPatientInput } from "@/@types/patient";
-import { CreateUserInput, LoginInput, MeUser } from "@/@types/user";
+import {
+  CreateUserInput,
+  LoginInput,
+  MeUser,
+  UpdateUserInput,
+} from "@/@types/user";
 import { apiInstance } from "./api";
 
 export const userApi = {
@@ -29,6 +34,14 @@ export const userApi = {
     return (
       await apiInstance.post<{ data: MeUser }>("/user/onboard", {
         doctor: formData,
+      })
+    ).data.data;
+  },
+
+  async updateMe(formData: UpdateUserInput): Promise<MeUser> {
+    return (
+      await apiInstance.patch<{ data: MeUser }>("/user/me", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       })
     ).data.data;
   },

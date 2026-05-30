@@ -29,3 +29,11 @@ export type CreateUserInput = Omit<
 >;
 
 export type LoginInput = Pick<FullUser, "email" | "password">;
+
+export interface UpdateUserInput {
+  password?: string;
+  name?: string;
+  birthday?: string; // datetime string
+  profilePic?: File; // -> File, must be image only, max 1, idk what type this should be, BE expects multiform
+  mobileNumber?: string;
+}

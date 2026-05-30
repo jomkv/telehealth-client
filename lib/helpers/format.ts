@@ -29,6 +29,13 @@ export const formatDatePHT = (date: Date): string => {
   }).format(date);
 };
 
+export const formatIsoDate = (d: string): string | undefined => {
+  const isoStr = new Date(d).toISOString();
+  const dateOnly = isoStr.split("T")?.[0];
+
+  return dateOnly ?? undefined;
+};
+
 export const friendlyDay = (d: string | Date) => {
   const date = new Date(d);
   if (isToday(date)) return `Today, ${formatTime(date)}`;

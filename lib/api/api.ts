@@ -22,3 +22,10 @@ apiInstance.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+apiInstance.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
+  return config;
+});
