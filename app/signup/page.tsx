@@ -20,23 +20,34 @@ const roleOptions = ["PATIENT", "DOCTOR"] as const;
 const isNumeric = (value: string) =>
   value.split("").every((char) => char >= "0" && char <= "9");
 
-const signupSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required.")
-    .max(100, "Name must not 100 exceed characters."),
-  email: z.string().email("Enter valid email."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
-  role: z.enum(roleOptions, {
-    required_error: "Select a role.",
-    invalid_type_error: "Select a role.",
-  }),
-  birthday: z.string().min(1, "Birthday is required."),
-  mobileNumber: z
-    .string()
-    .length(10, "Enter 10 digits after +63.")
-    .refine(isNumeric, "Digits only."),
-});
+const signupSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, "Name is required.")
+      .max(100, "Name must not 100 exceed characters."),
+    email: z.string().email("Enter valid email."),
+    password: z.string().min(6, "Password must be at least 6 characters."),
+    role: z.enum(roleOptions, {
+      required_error: "Select a role.",
+      invalid_type_error: "Select a role.",
+    }),
+    birthday: z.string().min(1, "Birthday is required."),
+    mobileNumber: z
+      .string()
+      .length(10, "Enter 10 digits after +63.")
+      .refine(isNumeric, "Digits only."),
+    confirmPassword: z.string().min(1, "Please confirm your password."),
+  })
+  .superRefine(({ password, confirmPassword }, ctx) => {
+    if (password !== confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords do not match.",
+        path: ["confirmPassword"],
+      });
+    }
+  });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -65,7 +76,10 @@ export default function SignupPage() {
   });
   const router = useRouter();
 
-  const onSubmit = async (values: SignupFormValues) => {
+  const onSubmit = async ({
+    confirmPassword: _,
+    ...values
+  }: SignupFormValues) => {
     clearErrors("root");
     try {
       await signup.mutateAsync(values);
@@ -164,6 +178,24 @@ export default function SignupPage() {
           />
           {errors.password ? (
             <p className="text-xs text-[#CF4500]">{errors.password.message}</p>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold uppercase tracking-[0.22em] text-[#696969]">
+            Confirm password
+          </label>
+          <input
+            type="password"
+            autoComplete="new-password"
+            placeholder="Repeat your password"
+            className="h-12 w-full rounded-full border border-[#141413]/15 bg-white px-5 text-base text-[#141413] shadow-[inset_0_0_0_1px_rgba(20,20,19,0.04)] outline-none focus-visible:ring-2 focus-visible:ring-[#141413]/20"
+            {...register("confirmPassword")}
+          />
+          {errors.confirmPassword ? (
+            <p className="text-xs text-[#CF4500]">
+              {errors.confirmPassword.message}
+            </p>
           ) : null}
         </div>
 
