@@ -89,7 +89,7 @@ export function AppNav() {
                 name={user ? user.name : "A B"}
                 src={user ? user.profilePic : null}
                 className="h-9 w-9 ring-1 ring-border"
-                fallbackClassName="bg-muted text-xl"
+                fallbackClassName="bg-muted text-xs"
               />
             </button>
           </DropdownMenuTrigger>
@@ -106,7 +106,7 @@ export function AppNav() {
             </DropdownMenuItem>
             <DropdownMenuItem
               disabled={logout.isPending}
-              onClick={() => logout.mutate()}
+              onClick={() => logout.mutateAsync()}
             >
               Logout
             </DropdownMenuItem>

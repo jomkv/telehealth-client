@@ -9,6 +9,7 @@ import { useUserStore } from "../store";
 import { userApi } from "@/lib/api/user.api";
 import { UpdateUserForm } from "./components/update-user-form";
 import { MeUser, UpdateUserInput } from "@/@types/user";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
   const user = useUserStore((s) => s.user);
@@ -26,10 +27,11 @@ export default function ProfilePage() {
 
   // no preview state — using plain file input
 
-  const { mutate, isPending, isSuccess } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: (fd: UpdateUserInput) => userApi.updateMe(fd),
     onSuccess: (user: MeUser) => {
       setUser(user);
+      toast.success("Profile updated");
     },
   });
 
