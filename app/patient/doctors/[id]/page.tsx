@@ -4,9 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { initials } from "@/lib/helpers/format";
 import { buildScheduledAtFromDateSlot } from "@/lib/helpers/availability-slots";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { doctorApi } from "@/lib/api/doctor.api";
@@ -15,6 +13,7 @@ import { extractErrorMessage } from "@/lib/helpers/extract-error-message";
 import { BookingDialog } from "./components/booking-dialog";
 import BookingScheduleSelector from "@/components/selectors/booking-schedule-selector";
 import { SelectedSlot } from "@/@types/consultation";
+import { UserAvatar } from "@/components/avatars/user-avatar";
 
 export default function DoctorDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -115,11 +114,12 @@ export default function DoctorDetailPage() {
 
       {/* Doctor header card */}
       <section className="flex flex-wrap items-start gap-8 rounded-[2.5rem] bg-card p-8">
-        <Avatar className="h-32 w-32 ring-1 ring-border">
-          <AvatarFallback className="bg-muted text-2xl">
-            {initials(doctor.user.name)}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          name={doctor.user.name}
+          src={doctor.user.profilePic}
+          className="h-32 w-32 ring-1 ring-border"
+          fallbackClassName="bg-muted text-xl"
+        />
         <div className="flex-1 min-w-[260px]">
           <Eyebrow>{doctor.specialization.label}</Eyebrow>
           <h1 className="mt-3 text-4xl">{doctor.user.name}</h1>

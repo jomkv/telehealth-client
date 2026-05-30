@@ -15,10 +15,17 @@ import {
 } from "@/components/ui/dialog";
 import { formatDatePHT, formatHour } from "@/lib/helpers/format";
 import { SelectedSlot } from "@/@types/consultation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
-type BookingFormValues = {
-  patientNotes: string;
-};
+const schema = z.object({
+  patientNotes: z
+    .string()
+    .min(4, "Use at least 4 characters.")
+    .max(400, "Keep notes under 400 characters."),
+});
+
+type BookingFormValues = z.infer<typeof schema>;
 
 type BookingDialogProps = {
   open: boolean;
@@ -43,9 +50,8 @@ export function BookingDialog({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<BookingFormValues>({
-    defaultValues: {
-      patientNotes: "",
-    },
+    resolver: zodResolver(schema),
+    defaultValues: { patientNotes: "" },
   });
 
   useEffect(() => {
@@ -60,7 +66,7 @@ export function BookingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl">
+      <DialogContent className="rounded-3xl sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Book consultation</DialogTitle>
           <DialogDescription>
@@ -70,17 +76,14 @@ export function BookingDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <form className="space-y-4 min-w-0" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-2">
             <label className="text-sm font-medium">Symptoms or concerns</label>
             <Textarea
               rows={4}
               placeholder="What would you like to discuss?"
-              {...register("patientNotes", {
-                required: "Please provide details.",
-                validate: (value) =>
-                  value.trim().length >= 4 || "Use at least 4 characters.",
-              })}
+              className="resize-none w-full break-words"
+              {...register("patientNotes")}
             />
             {errors.patientNotes ? (
               <p className="text-xs text-destructive">

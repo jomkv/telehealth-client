@@ -1,6 +1,5 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationBell } from "./notification-bell";
 import {
   DropdownMenu,
@@ -10,13 +9,13 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { initials } from "@/lib/helpers/format";
 import { usePathname, useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { userApi } from "@/lib/api/user.api";
 import { toast } from "sonner";
+import { UserAvatar } from "../avatars/user-avatar";
 
 const patientLinks = [
   { to: "/patient" as const, label: "Home" },
@@ -86,11 +85,12 @@ export function AppNav() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2">
-              <Avatar className="h-9 w-9 ring-1 ring-border">
-                <AvatarFallback className="bg-muted text-xs">
-                  {user ? initials(user.name) : "AB"}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                name={user ? user.name : "A B"}
+                src={user ? user.profilePic : null}
+                className="h-9 w-9 ring-1 ring-border"
+                fallbackClassName="bg-muted text-xl"
+              />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40 rounded-md">

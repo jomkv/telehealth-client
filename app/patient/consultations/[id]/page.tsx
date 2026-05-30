@@ -4,11 +4,10 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
 import { StatusPill } from "@/components/ui-bits/status-pill";
-import { friendlyDay, formatDateTime, initials } from "@/lib/helpers/format";
+import { friendlyDay, formatDateTime } from "@/lib/helpers/format";
 import { CalendarClock, RefreshCw, Video, XCircle, X } from "lucide-react";
 import { consultationApi } from "@/lib/api/consultation.api";
 import { doctorApi } from "@/lib/api/doctor.api";
@@ -18,6 +17,8 @@ import { buildScheduledAtFromDateSlot } from "@/lib/helpers/availability-slots";
 import { RescheduleDialog } from "./components/reschedule-dialog";
 import BookingScheduleSelector from "../../../../components/selectors/booking-schedule-selector";
 import { SelectedSlot } from "@/@types/consultation";
+import { UserAvatar } from "@/components/avatars/user-avatar";
+import Empty from "@/components/ui-bits/empty";
 
 export default function ConsultationDetailPage() {
   const [isRescheduling, setIsRescheduling] = useState(false);
@@ -84,17 +85,11 @@ export default function ConsultationDetailPage() {
   }
 
   if (isConsultationLoading) {
-    return (
-      <div className="py-24 text-center text-muted-foreground">Loading…</div>
-    );
+    return <Empty label="Consultation loading..." />;
   }
 
   if (!c) {
-    return (
-      <div className="py-24 text-center text-muted-foreground">
-        Consultation not found.
-      </div>
-    );
+    return <Empty label="Consultation not found." />;
   }
 
   const canManage = c.status === "PENDING";
@@ -112,11 +107,12 @@ export default function ConsultationDetailPage() {
       <section className="rounded-[2.5rem] bg-card p-8">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="flex items-start gap-5">
-            <Avatar className="h-20 w-20">
-              <AvatarFallback className="bg-muted text-xl">
-                {initials(c.doctor.user.name)}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              name={c.doctor.user.name}
+              src={c.doctor.user.profilePic}
+              className="h-20 w-20 ring-1 ring-border"
+              fallbackClassName="bg-muted text-xl"
+            />
 
             <div>
               <Eyebrow>{c.doctor.specialization.label}</Eyebrow>

@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
 import { StatusPill } from "@/components/ui-bits/status-pill";
-import { friendlyDay, initials, formatDate } from "@/lib/helpers/format";
+import { friendlyDay, formatDate } from "@/lib/helpers/format";
 import { Video, XCircle, Save, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
 import { consultationApi } from "@/lib/api/consultation.api";
@@ -17,6 +16,7 @@ import Empty from "@/components/ui-bits/empty";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { UserAvatar } from "@/components/avatars/user-avatar";
 
 function Tag({ label, items }: { label: string; items: string[] }) {
   return (
@@ -123,11 +123,12 @@ export default function DoctorConsultationDetailPage() {
       <section className="rounded-[2.5rem] bg-card p-8">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="flex items-start gap-5">
-            <Avatar className="h-20 w-20">
-              <AvatarFallback className="bg-muted text-xl">
-                {initials(p.user.name)}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              name={p.user.name}
+              src={p.user.profilePic}
+              className="h-20 w-20 ring-1 ring-border"
+              fallbackClassName="bg-muted text-xl"
+            />
             <div>
               <Eyebrow>Patient</Eyebrow>
               <h1 className="mt-2 text-3xl">{p.user.name}</h1>

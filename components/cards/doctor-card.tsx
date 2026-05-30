@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Eyebrow } from "@/components/ui-bits/eyebrow";
-import { initials } from "@/lib/helpers/format";
 import { PopulatedDoctor } from "@/@types/doctor";
+import { UserAvatar } from "../avatars/user-avatar";
 
 export function DoctorCard({ doctor }: { doctor: PopulatedDoctor }) {
   return (
@@ -12,11 +11,12 @@ export function DoctorCard({ doctor }: { doctor: PopulatedDoctor }) {
       className="group relative block rounded-[2.5rem] bg-card p-8 transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(0,0,0,0.08)]"
     >
       <div className="flex items-start gap-6">
-        <Avatar className="h-24 w-24 ring-1 ring-border">
-          <AvatarFallback className="bg-muted text-xl font-medium">
-            {initials(doctor.user.name)}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          name={doctor.user.name}
+          src={doctor.user.profilePic}
+          className="h-24 w-24 ring-1 ring-border"
+          fallbackClassName="bg-muted text-xl"
+        />
         <div className="flex-1">
           <Eyebrow>{doctor.specialization.label}</Eyebrow>
           <h3 className="mt-2 text-2xl">{doctor.user.name}</h3>

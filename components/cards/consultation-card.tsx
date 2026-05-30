@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Video, FileText, CalendarClock } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "../ui-bits/status-pill";
 import { ConsultationView } from "@/@types/consultation";
-import { friendlyDay, initials } from "@/lib/helpers/format";
+import { friendlyDay } from "@/lib/helpers/format";
+import { UserAvatar } from "../avatars/user-avatar";
 
 interface ConsultationCardProps {
   consultation: ConsultationView;
@@ -38,11 +38,12 @@ export function ConsultationCard({
       {/* Header row */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-4">
-          <Avatar className="h-14 w-14">
-            <AvatarFallback className="bg-muted">
-              {initials(counterpart.name)}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            name={counterpart.name}
+            src={counterpart.profilePic}
+            className="h-14 w-14 ring-1 ring-border"
+            fallbackClassName="bg-muted text-xl"
+          />
 
           <div>
             <p className="text-lg font-medium">{counterpart.name}</p>
