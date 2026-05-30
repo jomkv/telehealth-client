@@ -43,24 +43,18 @@ export default function PatientRecordPage() {
     enabled: !!patientId,
   });
 
-  const { data: allConsults = [] } = useQuery({
+  const { data: allConsults = [], isLoading: isConsultsLoading } = useQuery({
     queryKey: ["consultations", "doctor", user?.doctor?.id],
     queryFn: consultationApi.getMyConsultations,
     enabled: !!user?.doctor?.id,
   });
 
   if (isLoading) {
-    return (
-      <div className="py-24 text-center text-muted-foreground">Loading…</div>
-    );
+    return <Empty label="Loading patient..." />;
   }
 
   if (!patient) {
-    return (
-      <div className="py-24 text-center text-muted-foreground">
-        Patient not found.
-      </div>
-    );
+    return <Empty label="Patient not found." />;
   }
 
   const past = allConsults
@@ -115,7 +109,10 @@ export default function PatientRecordPage() {
       {/* Consultation history */}
       <section className="space-y-4">
         <Eyebrow>Your consultation history with this patient</Eyebrow>
-        {past.length === 0 ? (
+
+        {isConsultsLoading ? (
+          <Empty label="Loading previous consultations with this patient..." />
+        ) : past.length === 0 ? (
           <Empty label="No completed consultations with this patient yet." />
         ) : (
           past.map((c) => (

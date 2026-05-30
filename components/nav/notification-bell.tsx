@@ -55,12 +55,17 @@ export function NotificationBell() {
         <DropdownMenuLabel className="flex items-center justify-between">
           Notifications
           <span className="text-xs font-normal text-muted-foreground">
-            {unread} unread
+            {isLoading ? "—" : unread} unread
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {items.length === 0 && (
-          <p className="text-center font-extralight py-5">No notifications</p>
+        {isLoading && (
+          <p className="text-center font-extralight py-5">
+            Loading notifications...
+          </p>
+        )}
+        {!isLoading && items.length === 0 && (
+          <p className="text-center font-extralight py-5">No notifications.</p>
         )}
         {items.slice(0, 4).map((n) => (
           <DropdownMenuItem

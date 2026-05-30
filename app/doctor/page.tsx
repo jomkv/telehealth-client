@@ -37,7 +37,7 @@ export default function DoctorHomePage() {
       <PageHeader
         eyebrow={`Good day, ${firstName}`}
         title="Your schedule today."
-        description={`${todayCount.length} consultation${todayCount.length === 1 ? "" : "s"} on the books for today.`}
+        description={`${isLoading ? "—" : todayCount.length} consultation${todayCount.length === 1 ? "" : "s"} on the books for today.`}
         actions={
           <Button asChild className="rounded-full">
             <Link href="/doctor/availability">Manage availability</Link>
@@ -49,15 +49,19 @@ export default function DoctorHomePage() {
       <section className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Today"
-          value={todayCount.length}
+          value={isLoading ? "—" : todayCount.length}
           hint="consultations"
         />
         <StatCard
           label="Upcoming"
-          value={upcomingCount.length}
+          value={isLoading ? "—" : upcomingCount.length}
           hint="this period"
         />
-        <StatCard label="Completed" value={completedCount} hint="lifetime" />
+        <StatCard
+          label="Completed"
+          value={isLoading ? "—" : completedCount}
+          hint="lifetime"
+        />
       </section>
 
       {/* Next up */}

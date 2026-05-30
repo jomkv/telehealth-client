@@ -84,7 +84,7 @@ export default function BrowsePanel() {
       </p>
 
       {isLoading ? (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, index) => (
             <div
               key={`doctor-skeleton-${index}`}
@@ -95,7 +95,7 @@ export default function BrowsePanel() {
       ) : filteredDoctors.length === 0 ? (
         <Empty label="No doctors match your search." />
       ) : (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           {filteredDoctors.map((d) => (
             <DoctorCard key={d.id} doctor={d} />
           ))}

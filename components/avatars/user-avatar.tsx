@@ -24,13 +24,11 @@ export function UserAvatar({
 
   return (
     <Avatar className={className}>
-      {src ? (
-        <AvatarImage
-          src={src}
-          alt={alt ?? name ?? "User avatar"}
-          className={imageClassName}
-        />
-      ) : null}
+      <AvatarImage
+        src={src ?? undefined}
+        alt={alt ?? name ?? "User avatar"}
+        className={imageClassName}
+      />
       <AvatarFallback className={fallbackClassName}>
         {fallbackText}
       </AvatarFallback>

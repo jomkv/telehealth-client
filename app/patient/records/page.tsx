@@ -32,12 +32,10 @@ const toNumber = (value: unknown) => {
 
 const toOptionalArray = (value: unknown) => {
   if (Array.isArray(value)) {
-    return value;
+    return value.length ? value : undefined;
   }
-
   return value;
 };
-
 const patientSchema = z.object({
   weight: z.preprocess(
     toNumber,
@@ -57,9 +55,18 @@ const patientSchema = z.object({
       })
       .positive("Height must be greater than 0."),
   ),
-  conditions: z.preprocess(toOptionalArray, z.array(z.string()).default([])),
-  allergies: z.preprocess(toOptionalArray, z.array(z.string()).default([])),
-  medications: z.preprocess(toOptionalArray, z.array(z.string()).default([])),
+  conditions: z.preprocess(
+    toOptionalArray,
+    z.array(z.string()).max(30, "Max of 30 conditions").optional(),
+  ),
+  allergies: z.preprocess(
+    toOptionalArray,
+    z.array(z.string()).max(30, "Max of 30 allergies").optional(),
+  ),
+  medications: z.preprocess(
+    toOptionalArray,
+    z.array(z.string()).max(30, "Max of 30 medications").optional(),
+  ),
   notes: z.preprocess(
     (value) => (value === "" ? undefined : value),
     z.string().max(600, "Keep notes under 600 characters.").optional(),
@@ -170,7 +177,7 @@ export default function RecordsPage() {
         description="Your profile-level health info plus history from completed consultations."
       />
 
-      <section className="grid gap-4 sm:grid-cols-2 items-start">
+      <section className="grid gap-4 grid-cols-1 sm:grid-cols-2 items-start">
         <div className="rounded-[2rem] bg-card p-6 space-y-3">
           <Eyebrow>Weight (kg)</Eyebrow>
           <Input

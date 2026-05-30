@@ -10,6 +10,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { notificationApi } from "@/lib/api/notification.api";
 import { toast } from "sonner";
 import { useSocketContext } from "@/components/providers/socket-provider";
+import Empty from "@/components/ui-bits/empty";
 
 export default function NotificationsPage() {
   const user = useUserStore((s) => s.user);
@@ -70,7 +71,7 @@ export default function NotificationsPage() {
       <PageHeader
         eyebrow="Activity"
         title="Notifications"
-        description={`${unread} unread of ${items.length} total.`}
+        description={`${isLoading ? "—" : unread} unread of ${isLoading ? "—" : items.length} total.`}
         actions={
           <Button
             variant="outline"
@@ -83,6 +84,10 @@ export default function NotificationsPage() {
         }
       />
       <ul className="space-y-3">
+        {isLoading && <Empty label="Loading notifications..." />}
+        {!isLoading && items.length === 0 && (
+          <Empty label="No notifications yet." />
+        )}
         {items.map((n) => (
           <li
             key={n.id}

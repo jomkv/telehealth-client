@@ -116,7 +116,7 @@ export default function AIPanel() {
               ))}
             </div>
           )}
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
             {isLoading || isFetching ? (
               <Empty label="Looking for doctors..." />
             ) : Array.isArray(data?.doctors) && data!.doctors.length > 0 ? (

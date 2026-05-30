@@ -13,6 +13,10 @@ import { friendlyDay, initials, formatDate } from "@/lib/helpers/format";
 import { Video, XCircle, Save, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
 import { consultationApi } from "@/lib/api/consultation.api";
+import Empty from "@/components/ui-bits/empty";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 function Tag({ label, items }: { label: string; items: string[] }) {
   return (
@@ -38,6 +42,15 @@ function Tag({ label, items }: { label: string; items: string[] }) {
   );
 }
 
+const notesSchema = z.object({
+  notes: z
+    .string()
+    .min(8, "Notes must be at least 8 characters.")
+    .max(600, "Keep notes under 600 characters."),
+});
+
+type NotesFormValues = z.infer<typeof notesSchema>;
+
 export default function DoctorConsultationDetailPage() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
@@ -48,13 +61,19 @@ export default function DoctorConsultationDetailPage() {
     enabled: !!id,
   });
 
-  const [notes, setNotes] = useState(c?.doctorNotes ?? "");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<NotesFormValues>({
+    resolver: zodResolver(notesSchema),
+    defaultValues: { notes: "" },
+  });
 
   useEffect(() => {
-    if (c && c.doctorNotes) {
-      setNotes(c.doctorNotes);
-    }
-  }, [c]);
+    if (c) reset({ notes: c.doctorNotes ?? "" });
+  }, [c, reset]);
 
   const cancelMutation = useMutation({
     mutationFn: () => consultationApi.cancelConsultation(id),
@@ -67,7 +86,8 @@ export default function DoctorConsultationDetailPage() {
   });
 
   const saveNotesMutation = useMutation({
-    mutationFn: () => consultationApi.saveConsultationNotes(id, notes),
+    mutationFn: (values: NotesFormValues) =>
+      consultationApi.saveConsultationNotes(id, values.notes),
     onSuccess: () => {
       toast.success("Notes saved.");
       queryClient.invalidateQueries({ queryKey: ["consultation", id] });
@@ -76,9 +96,7 @@ export default function DoctorConsultationDetailPage() {
   });
 
   if (isLoading) {
-    return (
-      <div className="py-24 text-center text-muted-foreground">Loading…</div>
-    );
+    return <Empty label="Loading patient consultation..." />;
   }
 
   if (!c) {
@@ -149,7 +167,7 @@ export default function DoctorConsultationDetailPage() {
       </section>
 
       {/* Detail grid */}
-      <section className="grid gap-6 md:grid-cols-3">
+      <section className="grid gap-6 grid-cols-1 md:grid-cols-3">
         {/* Patient summary sidebar */}
         <div className="rounded-[2rem] bg-card p-6 md:col-span-1">
           <Eyebrow>Patient summary</Eyebrow>
@@ -189,21 +207,31 @@ export default function DoctorConsultationDetailPage() {
               Markdown supported. Cover directions, recommendations, and
               medications.
             </p>
-            <Textarea
-              rows={10}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="mt-4"
-              placeholder="Patient reports… Plan…"
-            />
-            <Button
-              className="mt-4 rounded-full"
-              disabled={saveNotesMutation.isPending}
-              onClick={() => saveNotesMutation.mutate()}
+            <form
+              onSubmit={handleSubmit((values) =>
+                saveNotesMutation.mutate(values),
+              )}
             >
-              <Save className="mr-1.5 h-4 w-4" aria-hidden />
-              Save notes
-            </Button>
+              <Textarea
+                rows={10}
+                className="mt-4"
+                placeholder="Patient reports… Plan…"
+                {...register("notes")}
+              />
+              {errors.notes && (
+                <p className="mt-1.5 text-xs text-destructive">
+                  {errors.notes.message}
+                </p>
+              )}
+              <Button
+                type="submit"
+                className="mt-4 rounded-full"
+                disabled={saveNotesMutation.isPending}
+              >
+                <Save className="mr-1.5 h-4 w-4" aria-hidden />
+                Save notes
+              </Button>
+            </form>
           </div>
         </div>
       </section>

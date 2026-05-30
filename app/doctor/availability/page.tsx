@@ -20,6 +20,7 @@ import { availabilityApi } from "@/lib/api/availability.api";
 import { buildInitialState, slotCount } from "@/lib/helpers/availability-slots";
 import { PageHeader } from "@/components/nav/page-header";
 import { DAYS, HOURS } from "@/lib/constants";
+import Empty from "@/components/ui-bits/empty";
 
 export default function AvailabilityPage() {
   const user = useUserStore((s) => s.user);
@@ -93,8 +94,13 @@ export default function AvailabilityPage() {
 
   if (isLoading || !week) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="space-y-10">
+        <PageHeader
+          eyebrow="Your calendar"
+          title="Weekly Schedule"
+          description="Set your recurring availability. Changes apply immediately and indefinitely until you update them again."
+        />
+        <Empty label="Loading weekly schedule..." />
       </div>
     );
   }
