@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Medra
+
+A telehealth platform connecting patients with doctors for virtual consultations. Patients can browse specialists, book appointments via AI symptom matching or manual search, manage their medical records, and join video consultations. Doctors manage their weekly availability, view patient records, and write consultation notes.
+
+---
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **UI Components:** shadcn/ui + Radix UI primitives
+- **State Management:** Zustand
+- **Server State:** TanStack Query v5
+- **Forms:** React Hook Form + Zod
+- **Real-time:** Socket.IO client
+- **Fonts:** Geist Sans & Geist Mono
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- A running instance of the Medra backend API
+
+### Installation
+
+```bash
+git clone <repo-url>
+cd telehealth-client
+npm install
+```
+
+### Environment Variables
+
+Create a `.env` file in the root:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
+```
+
+### Running the Dev Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Build for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/
+├── login/              # Login page
+├── signup/             # Registration page
+├── onboarding/         # Role-specific onboarding (patient / doctor)
+├── profile/            # Shared profile & account settings
+├── notifications/      # Notification feed
+├── patient/
+│   ├── page.tsx        # Patient dashboard
+│   ├── doctors/        # Doctor directory + AI symptom match + booking
+│   ├── consultations/  # Consultation list & detail (reschedule, cancel, join)
+│   └── records/        # Medical records (weight, height, conditions, history)
+└── doctor/
+    ├── page.tsx         # Doctor dashboard
+    ├── availability/    # Weekly schedule editor
+    ├── consultations/   # Consultation list & detail (notes, cancel, join)
+    ├── patients/        # Per-patient record view
+    └── portfolio/       # Specialization, bio, years of practice
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+components/
+├── avatars/            # UserAvatar
+├── cards/              # ConsultationCard, DoctorCard, StatCard
+├── nav/                # AppNav, NotificationBell, PageHeader, Footer
+├── providers/          # QueryClient, UserProvider, SocketProvider
+├── selectors/          # BookingScheduleSelector
+├── shells/             # AppShell, AuthShell
+└── ui/                 # shadcn/ui primitives (button, dialog, tabs, etc.)
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Patients
+
+- Browse doctors by name or specialization
+- AI symptom match — describe symptoms to get specialist recommendations
+- Book, reschedule, or cancel consultations
+- Join video consultations via meeting link
+- View and update medical records (weight, height, conditions, allergies, medications)
+- Full consultation history with doctor notes
+
+### Doctors
+
+- Dashboard with today's schedule and stats
+- Manage weekly recurring availability (per-day time windows)
+- View upcoming, past, and cancelled consultations
+- Write and save consultation notes
+- View full patient records and consultation history
+- Manage professional portfolio (specialization, bio, years of practice)
+
+### Shared
+
+- Real-time notifications via WebSocket
+- Role-based routing (`PATIENT` / `DOCTOR`)
+- Profile management (name, password, birthday, mobile, avatar)
+
+---
+
+## Scripts
+
+| Command         | Description              |
+| --------------- | ------------------------ |
+| `npm run dev`   | Start development server |
+| `npm run build` | Production build         |
+| `npm start`     | Start production server  |
+| `npm run lint`  | Run ESLint               |
