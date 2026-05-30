@@ -100,8 +100,6 @@ export function UpdateUserForm({
 }: UpdateUserFormProps) {
   const user = useUserStore((s) => s.user);
 
-  console.log(user);
-
   const {
     control,
     handleSubmit,

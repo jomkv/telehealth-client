@@ -54,9 +54,9 @@ export function AppNav() {
     <div className="sticky top-6 z-40 mx-auto flex w-[min(1180px,calc(100%-2rem))] items-center gap-4 rounded-full bg-white px-5 py-3 shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
       <Link href="/" className="flex items-center gap-2 pr-2">
         <div className="grid h-7 w-7 place-items-center rounded-full bg-foreground text-background text-xs font-bold">
-          T
+          M
         </div>
-        <span className="font-medium">Telecare</span>
+        <span className="font-medium">Medra</span>
       </Link>
       <nav className="hidden flex-1 items-center gap-1 md:flex">
         {links.map((l) => {

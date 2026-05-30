@@ -3,17 +3,20 @@ import { cookies } from "next/headers";
 
 export async function getMe(): Promise<MeUser | null> {
   const cookieStore = await cookies();
-  const allCookies = cookieStore.toString();
+
+  // Properly serialize cookies into "name=value; name2=value2" format
+  const allCookies = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
 
   if (!allCookies) return null;
 
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/me`, {
       headers: {
-        // Pass the cookies to req
         Cookie: allCookies,
       },
-      // Ensure we don't cache stale user data
       cache: "no-store",
     });
 

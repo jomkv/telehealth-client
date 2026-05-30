@@ -26,8 +26,6 @@ function SocketContextProvider({ children }: PropsWithChildren<unknown>) {
   const hydrated = useUserStore((s) => s.hydrated);
 
   useEffect(() => {
-    console.log("1");
-
     if (!user || !hydrated) {
       if (socket) {
         socket.close();
@@ -36,11 +34,7 @@ function SocketContextProvider({ children }: PropsWithChildren<unknown>) {
       return;
     }
 
-    console.log("2");
-
     if (!user?.id) return;
-
-    console.log("3");
 
     const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
       withCredentials: true,
@@ -48,17 +42,11 @@ function SocketContextProvider({ children }: PropsWithChildren<unknown>) {
       autoConnect: true,
     });
 
-    console.log("4", newSocket);
-
     setSocket(newSocket);
-
-    console.log("5");
 
     newSocket.on("connect", () => {
       console.log("Connected to socket server");
     });
-
-    console.log("6");
 
     return () => {
       newSocket.close();
