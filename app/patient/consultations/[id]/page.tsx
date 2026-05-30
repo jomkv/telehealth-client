@@ -183,7 +183,7 @@ export default function ConsultationDetailPage() {
       </section>
 
       {/* Inline reschedule picker */}
-      {doctor && isRescheduling && (
+      {canManage && doctor && isRescheduling && (
         <BookingScheduleSelector
           doctor={doctor}
           handleInitiateBooking={handleInitiateBooking}
